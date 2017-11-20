@@ -37,7 +37,7 @@ entity RegisterFile is
 			ReadRegA : in  STD_LOGIC_VECTOR(3 downto 0);
 			ReadRegB : in  STD_LOGIC_VECTOR(3 downto 0);
 			WriteReg : in  STD_LOGIC_VECTOR(3 downto 0);
-			WriteData : in  STD_LOGIC_VECTOR(3 downto 0);
+			WriteData : in  STD_LOGIC_VECTOR(15 downto 0);
 			PCInput : in  STD_LOGIC_VECTOR(15 downto 0);
 			ReadDataA : out  STD_LOGIC_VECTOR(15 downto 0);
 			ReadDataB : out  STD_LOGIC_VECTOR(15 downto 0));
@@ -46,18 +46,18 @@ end RegisterFile;
 architecture Behavioral of RegisterFile is
 
 	type RegisterArray is array(0 to 11) of STD_LOGIC_VECTOR(15 downto 0);
-	signal Registers : RegisterArray
+	signal Registers : RegisterArray;
 
 begin
 
 	with ReadRegA select ReadDataA <=
-		(others => '0') when "0000" else
-		PCInput when "0001" else
+		(others => '0') when "0000",
+		PCInput when "0001",
 		Registers(to_integer(unsigned(ReadRegA))) when others;
 
 	with ReadRegB select ReadDataB <=
-		(others => '0') when "0000" else
-		PCInput when "0001" else
+		(others => '0') when "0000",
+		PCInput when "0001",
 		Registers(to_integer(unsigned(ReadRegA))) when others;
 
 	Update : process (Reset, Clock)
