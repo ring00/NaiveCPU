@@ -30,17 +30,17 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity RegisterFile is
-	Port (Clock : in  STD_LOGIC;
-			Reset : in  STD_LOGIC;
-			Clear : in  STD_LOGIC;
-			WriteEN : in  STD_LOGIC;
-			ReadRegA : in  STD_LOGIC_VECTOR(3 downto 0);
-			ReadRegB : in  STD_LOGIC_VECTOR(3 downto 0);
-			WriteReg : in  STD_LOGIC_VECTOR(3 downto 0);
-			WriteData : in  STD_LOGIC_VECTOR(15 downto 0);
-			PCInput : in  STD_LOGIC_VECTOR(15 downto 0);
-			ReadDataA : out  STD_LOGIC_VECTOR(15 downto 0);
-			ReadDataB : out  STD_LOGIC_VECTOR(15 downto 0));
+	Port (Clock : in STD_LOGIC;
+			Reset : in STD_LOGIC;
+			Clear : in STD_LOGIC;
+			WriteEN : in STD_LOGIC;
+			ReadRegA : in STD_LOGIC_VECTOR(3 downto 0);
+			ReadRegB : in STD_LOGIC_VECTOR(3 downto 0);
+			WriteReg : in STD_LOGIC_VECTOR(3 downto 0);
+			WriteData : in STD_LOGIC_VECTOR(15 downto 0);
+			PCInput : in STD_LOGIC_VECTOR(15 downto 0);
+			ReadDataA : out STD_LOGIC_VECTOR(15 downto 0);
+			ReadDataB : out STD_LOGIC_VECTOR(15 downto 0));
 end RegisterFile;
 
 architecture Behavioral of RegisterFile is

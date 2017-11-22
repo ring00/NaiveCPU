@@ -1,18 +1,18 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date:    21:12:22 11/21/2017 
--- Design Name: 
--- Module Name:    NorthBridge - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
+-- Company:
+-- Engineer:
 --
--- Dependencies: 
+-- Create Date:    21:12:22 11/21/2017
+-- Design Name:
+-- Module Name:    NorthBridge - Behavioral
+-- Project Name:
+-- Target Devices:
+-- Tool versions:
+-- Description:
 --
--- Revision: 
+-- Dependencies:
+--
+-- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments: TODO: Fix bugs in this module.
 --
@@ -30,37 +30,37 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity NorthBridge is
-	Port (Clock : in  STD_LOGIC;
-			Reset : in  STD_LOGIC;
+	Port (Clock : in STD_LOGIC;
+			Reset : in STD_LOGIC;
 
-			CPUClock : out  STD_LOGIC;
+			CPUClock : out STD_LOGIC;
 
-			InstAddress : in  STD_LOGIC_VECTOR(15 downto 0);
-			InstData : out  STD_LOGIC_VECTOR(15 downto 0);
+			InstAddress : in STD_LOGIC_VECTOR(15 downto 0);
+			InstData : out STD_LOGIC_VECTOR(15 downto 0);
 
-			MemWriteEN : in  STD_LOGIC;
-			MemReadEN : in  STD_LOGIC;
-			DataAddress : in  STD_LOGIC_VECTOR(15 downto 0);
-			DataOutput : in  STD_LOGIC_VECTOR(15 downto 0);
+			MemWriteEN : in STD_LOGIC;
+			MemReadEN : in STD_LOGIC;
+			DataAddress : in STD_LOGIC_VECTOR(15 downto 0);
+			DataOutput : in STD_LOGIC_VECTOR(15 downto 0);
 
-			Ram1OE : out  STD_LOGIC;
-			Ram1WE : out  STD_LOGIC;
-			Ram1EN : out  STD_LOGIC;
-			Ram1Addr : out  STD_LOGIC_VECTOR(17 downto 0);
-			Ram1Data : inout  STD_LOGIC_VECTOR(15 downto 0);
+			Ram1OE : out STD_LOGIC;
+			Ram1WE : out STD_LOGIC;
+			Ram1EN : out STD_LOGIC;
+			Ram1Addr : out STD_LOGIC_VECTOR(17 downto 0);
+			Ram1Data : inout STD_LOGIC_VECTOR(15 downto 0);
 
-			SerialDataReady :  in STD_LOGIC;
-			SerialData :  inout STD_LOGIC_VECTOR(7 downto 0);
-			SerialRDN :  out STD_LOGIC;
-			SerialWRN :  out STD_LOGIC;
-			SerialTBRE :  in STD_LOGIC;
-			SerialTSRE :  in STD_LOGIC;
+			SerialDataReady : in STD_LOGIC;
+			SerialData : inout STD_LOGIC_VECTOR(7 downto 0);
+			SerialRDN : out STD_LOGIC;
+			SerialWRN : out STD_LOGIC;
+			SerialTBRE : in STD_LOGIC;
+			SerialTSRE : in STD_LOGIC;
 
-			Ram2OE : out  STD_LOGIC;
-			Ram2WE : out  STD_LOGIC;
-			Ram2EN : out  STD_LOGIC;
-			Ram2Addr : out  STD_LOGIC_VECTOR(17 downto 0);
-			Ram2Data : inout  STD_LOGIC_VECTOR(15 downto 0));
+			Ram2OE : out STD_LOGIC;
+			Ram2WE : out STD_LOGIC;
+			Ram2EN : out STD_LOGIC;
+			Ram2Addr : out STD_LOGIC_VECTOR(17 downto 0);
+			Ram2Data : inout STD_LOGIC_VECTOR(15 downto 0));
 end NorthBridge;
 
 architecture Behavioral of NorthBridge is

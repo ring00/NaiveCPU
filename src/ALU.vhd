@@ -1,20 +1,20 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date:    20:18:20 11/19/2017 
--- Design Name: 
--- Module Name:    ALU - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
+-- Company:
+-- Engineer:
 --
--- Dependencies: 
+-- Create Date:    20:18:20 11/19/2017
+-- Design Name:
+-- Module Name:    ALU - Behavioral
+-- Project Name:
+-- Target Devices:
+-- Tool versions:
+-- Description:
 --
--- Revision: 
+-- Dependencies:
+--
+-- Revision:
 -- Revision 0.01 - File Created
--- Additional Comments: 
+-- Additional Comments:
 --
 ----------------------------------------------------------------------------------
 library IEEE;
@@ -30,10 +30,10 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity ALU is
-	Port (ALUop : in  STD_LOGIC_VECTOR(3 downto 0);
-			InputA : in  STD_LOGIC_VECTOR(15 downto 0);
-			InputB : in  STD_LOGIC_VECTOR(15 downto 0);
-			Output : out  STD_LOGIC_VECTOR(15 downto 0));
+	Port (ALUop : in STD_LOGIC_VECTOR(3 downto 0);
+			InputA : in STD_LOGIC_VECTOR(15 downto 0);
+			InputB : in STD_LOGIC_VECTOR(15 downto 0);
+			Output : out STD_LOGIC_VECTOR(15 downto 0));
 end ALU;
 
 architecture Behavioral of ALU is
