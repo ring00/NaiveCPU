@@ -30,16 +30,16 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity IFID is
-	Port (Clock : in  STD_LOGIC;
-			Reset : in  STD_LOGIC;
-			Clear : in  STD_LOGIC;
-			WriteEN : in  STD_LOGIC;
+	Port (Clock : in STD_LOGIC;
+			Reset : in STD_LOGIC;
+			Clear : in STD_LOGIC;
+			WriteEN : in STD_LOGIC;
 
-			InstructionInput : in  STD_LOGIC_VECTOR(15 downto 0);
-			PCInput : in  STD_LOGIC_VECTOR(15 downto 0);
+			InstructionInput : in STD_LOGIC_VECTOR(15 downto 0);
+			PCInput : in STD_LOGIC_VECTOR(15 downto 0);
 
-			InstructionOutput : out  STD_LOGIC_VECTOR(15 downto 0);
-			PCOutput : out  STD_LOGIC_VECTOR(15 downto 0));
+			InstructionOutput : out STD_LOGIC_VECTOR(15 downto 0);
+			PCOutput : out STD_LOGIC_VECTOR(15 downto 0));
 end IFID;
 
 architecture Behavioral of IFID is
