@@ -67,11 +67,11 @@ begin
 											 or first5 = "11010" else -- SW_SP
 					EXT(last8, SIZE) when first5 = "01101" -- LI
 											 or first5 = "01011" else -- SLTUI
-					SXT(last4, SIZE) when first5 = "01000" and Instruction(4) = '0' else -- ADDIU3
+					SXT(last4, SIZE) when (first5 = "01000" and Instruction(4) = '0') else -- ADDIU3
 					SXT(last5, SIZE) when first5 = "10011" -- LW
 											 or first5 = "11011" else -- SW
-					EXT(from4to2, SIZE) when first5 = "00110" and last2 = "00" -- SLL
-												 or first5 = "00110" and last2 = "11" else -- SRA
+					EXT(from4to2, SIZE) when (first5 = "00110" and last2 = "00") -- SLL
+												 or (first5 = "00110" and last2 = "11") else -- SRA
 					(others => '0');
 
 end Behavioral;
