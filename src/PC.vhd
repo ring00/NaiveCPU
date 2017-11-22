@@ -50,7 +50,7 @@ begin
 	begin
 		if (Reset = '1') then
 			PC <= (others => '0');
-		elsif (FALLING_EDGE(Clock)) then -- TODO: Should I use FALLING_EDGE here?
+		elsif (RISING_EDGE(Clock)) then
 			if (Clear = '1') then
 				PC <= (others => '0');
 			elsif (WriteEN = '1') then
