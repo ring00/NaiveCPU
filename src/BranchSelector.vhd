@@ -22,7 +22,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL;
+--use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -38,10 +38,6 @@ entity BranchSelector is
 end BranchSelector;
 
 architecture Behavioral of BranchSelector is
-
-	constant ZERO : STD_LOGIC_VECTOR(15 downto 0) := "0000000000000000";
-	constant ONE : STD_LOGIC_VECTOR(15 downto 0) := "0000000000000001";
-
 begin
 
 	with BranchType select Address <=
