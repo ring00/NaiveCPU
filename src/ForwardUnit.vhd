@@ -44,11 +44,11 @@ architecture Behavioral of ForwardUnit is
 begin
 
 	ForwardA <= "01" when (EXMEMRegWrite = '1') and (EXMEMRegDest = IDEXRegSrcA) else
-					"10" when (EXMEMRegWrite = '1') and (MEMWBRegDest = IDEXRegSrcA) and not (EXMEMRegWrite = '1' and EXMEMRegDest = IDEXERegSrcA) else
+					"10" when (EXMEMRegWrite = '1') and (MEMWBRegDest = IDEXRegSrcA) and not (EXMEMRegWrite = '1' and EXMEMRegDest = IDEXRegSrcA) else
 					"00";
 
 	ForwardB <= "01" when (EXMEMRegWrite = '1') and (EXMEMRegDest = IDEXRegSrcB) else
-					"10" when (EXMEMRegWrite = '1') and (MEMWBRegDest = IDEXRegSrcB) and not (EXMEMRegWrite = '1' and EXMEMRegDest = IDEXERegSrcB) else
+					"10" when (EXMEMRegWrite = '1') and (MEMWBRegDest = IDEXRegSrcB) and not (EXMEMRegWrite = '1' and EXMEMRegDest = IDEXRegSrcB) else
 					"00";
 
 end Behavioral;
