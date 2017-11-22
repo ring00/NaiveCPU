@@ -30,7 +30,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity Mux3 is
-	Port (Sel : in STD_LOGIC;
+	Port (Sel : in STD_LOGIC_VECTOR(1 downto 0);
 			InputA : in STD_LOGIC_VECTOR(15 downto 0);
 			InputB : in STD_LOGIC_VECTOR(15 downto 0);
 			InputC : in STD_LOGIC_VECTOR(15 downto 0);
