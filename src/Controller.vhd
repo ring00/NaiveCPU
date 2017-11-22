@@ -30,7 +30,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity Controller is
-	Port( Instruction : in STD_LOGIC_VECTOR(15 downto 0);
+	Port (Instruction : in STD_LOGIC_VECTOR(15 downto 0);
 
 			RegWrite : out STD_LOGIC;
 			MemRead : out STD_LOGIC;
@@ -39,8 +39,7 @@ entity Controller is
 			RegSrcA : out STD_LOGIC_VECTOR(3 downto 0);
 			RegSrcB : out STD_LOGIC_VECTOR(3 downto 0);
 			RegDest : out STD_LOGIC_VECTOR(3 downto 0);
-			UseImm : out STD_LOGIC;
-			MemToReg : out STD_LOGIC);
+			UseImm : out STD_LOGIC);
 end Controller;
 
 architecture Behavioral of Controller is
@@ -90,10 +89,6 @@ begin
 	MemRead <= '1' when first5 = "10011" -- LW
 						  or first5 = "10010" else -- LW_SP
 				  '0';
-
-	MemToReg <= '1' when first5 = "10011" -- LW
-							or first5 = "10010" else -- LW_SP
-					'0';
 
 	MemWrite <= '1' when first5 = "11011" -- SW
 							or first5 = "11010" else -- SW_SP

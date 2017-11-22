@@ -38,14 +38,12 @@ entity EXMEM is
 			MemReadInput : in STD_LOGIC;
 			MemWriteInput : in STD_LOGIC;
 			RegDestInput : in STD_LOGIC_VECTOR(3 downto 0);
-			MemToRegInput : in STD_LOGIC;
 			EXResultInput : in STD_LOGIC_VECTOR(15 downto 0);
 			RegDataBInput : in STD_LOGIC_VECTOR(15 downto 0);
 			RegWriteOutput : out STD_LOGIC;
 			MemReadOutput : out STD_LOGIC;
 			MemWriteOutput : out STD_LOGIC;
 			RegDestOutput : out STD_LOGIC_VECTOR(3 downto 0);
-			MemToRegOutput : out STD_LOGIC;
 			EXResultOutput : out STD_LOGIC_VECTOR(15 downto 0);
 			RegDataBOutput : out STD_LOGIC_VECTOR(15 downto 0));
 end EXMEM;
@@ -56,7 +54,6 @@ architecture Behavioral of EXMEM is
 	signal MemRead : STD_LOGIC;
 	signal MemWrite : STD_LOGIC;
 	signal RegDest : STD_LOGIC_VECTOR(3 downto 0);
-	signal MemToReg : STD_LOGIC;
 	signal EXResult : STD_LOGIC_VECTOR(15 downto 0);
 	signal RegDataB : STD_LOGIC_VECTOR(15 downto 0);
 
@@ -66,7 +63,6 @@ begin
 	MemReadOutput <= MemRead;
 	MemWriteOutput <= MemWrite;
 	RegDestOutput <= RegDest;
-	MemToRegOutput <= MemToReg;
 	EXResultOutput <= EXResult;
 	RegDataBOutput <= RegDataB;
 
@@ -77,7 +73,6 @@ begin
 			MemRead <= '0';
 			MemWrite <= '0';
 			RegDest <= (others => '0');
-			MemToReg <= '0';
 			EXResult <= (others => '0');
 			RegDataB <= (others => '0');
 		elsif (RISING_EDGE(Clock)) then
@@ -86,7 +81,6 @@ begin
 				MemRead <= '0';
 				MemWrite <= '0';
 				RegDest <= (others => '0');
-				MemToReg <= '0';
 				EXResult <= (others => '0');
 				RegDataB <= (others => '0');
 			elsif (WriteEN = '1') then
@@ -94,7 +88,6 @@ begin
 				MemRead <= MemReadInput;
 				MemWrite <= MemWriteInput;
 				RegDest <= RegDestInput;
-				MemToReg <= MemToRegInput;
 				EXResult <= EXResultInput;
 				RegDataB <= RegDataBInput;
 			end if;

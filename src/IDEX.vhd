@@ -44,7 +44,6 @@ entity IDEX is
 			 RegSrcBInput : in STD_LOGIC_VECTOR(3 downto 0);
 			 RegDestInput : in STD_LOGIC_VECTOR(3 downto 0);
 			 UseImmInput : in STD_LOGIC;
-			 MemToRegInput : in STD_LOGIC;
 			 ExtendedInput : in STD_LOGIC_VECTOR(15 downto 0);
 			 ALUopInput : in STD_LOGIC_VECTOR(3 downto 0);
 			 RegDataAInput : in STD_LOGIC_VECTOR(15 downto 0);
@@ -59,7 +58,6 @@ entity IDEX is
 			 RegSrcBOutput : out STD_LOGIC_VECTOR(3 downto 0);
 			 RegDestOutput : out STD_LOGIC_VECTOR(3 downto 0);
 			 UseImmOutput : out STD_LOGIC;
-			 MemToRegOutput : out STD_LOGIC;
 			 ExtendedOutput : out STD_LOGIC_VECTOR(15 downto 0);
 			 ALUopOutput : out STD_LOGIC_VECTOR(3 downto 0);
 			 RegDataAOutput : out STD_LOGIC_VECTOR(15 downto 0);
@@ -77,7 +75,6 @@ architecture Behavioral of IDEX is
 	signal RegSrcB : STD_LOGIC_VECTOR(3 downto 0);
 	signal RegDest : STD_LOGIC_VECTOR(3 downto 0);
 	signal UseImm : STD_LOGIC;
-	signal MemToReg : STD_LOGIC;
 	signal Extended : STD_LOGIC_VECTOR(15 downto 0);
 	signal ALUop : STD_LOGIC_VECTOR(3 downto 0);
 	signal RegDataA : STD_LOGIC_VECTOR(15 downto 0);
@@ -94,7 +91,6 @@ begin
 	RegSrcBOutput <= RegSrcB;
 	RegDestOutput <= RegDest;
 	UseImmOutput <= UseImm;
-	MemToRegOutput <= MemToReg;
 	ExtendedOutput <= Extended;
 	ALUopOutput <= ALUop;
 	RegDataAOutput <= RegDataA;
@@ -112,7 +108,6 @@ begin
 			RegSrcB <= (others => '0');
 			RegDest <= (others => '0');
 			UseImm <= '0';
-			MemToReg <= '0';
 			Extended <= (others => '0');
 			ALUop <= (others => '0');
 			RegDataA <= (others => '0');
@@ -128,7 +123,6 @@ begin
 				RegSrcB <= (others => '0');
 				RegDest <= (others => '0');
 				UseImm <= '0';
-				MemToReg <= '0';
 				Extended <= (others => '0');
 				ALUop <= (others => '0');
 				RegDataA <= (others => '0');
@@ -143,7 +137,6 @@ begin
 				RegSrcB <= RegSrcBInput;
 				RegDest <= RegDestInput;
 				UseImm <= UseImmInput;
-				MemToReg <= MemToRegInput;
 				Extended <= ExtendedInput;
 				ALUop <= ALUopInput;
 				RegDataA <= RegDataAInput;

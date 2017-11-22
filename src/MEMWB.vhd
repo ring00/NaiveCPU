@@ -36,14 +36,14 @@ entity MEMWB is
 			WriteEN : in STD_LOGIC;
 
 			RegWriteInput : in STD_LOGIC;
+			MemReadInput : in STD_LOGIC;
 			RegDestInput : in STD_LOGIC_VECTOR(3 downto 0);
-			MemToRegInput : in STD_LOGIC;
 			EXResultInput : in STD_LOGIC_VECTOR(15 downto 0);
 			MemDataBInput : in STD_LOGIC_VECTOR(15 downto 0);
 
 			RegWriteOutput : out STD_LOGIC;
+			MemReadOutput : out STD_LOGIC;
 			RegDestOutput : out STD_LOGIC_VECTOR(3 downto 0);
-			MemToRegOutput : out STD_LOGIC;
 			EXResultOutput : out STD_LOGIC_VECTOR(15 downto 0);
 			MemDataBOutput : out STD_LOGIC_VECTOR(15 downto 0));
 end MEMWB;
@@ -51,16 +51,16 @@ end MEMWB;
 architecture Behavioral of MEMWB is
 
 	signal RegWrite : STD_LOGIC;
+	signal MemRead : STD_LOGIC;
 	signal RegDest : STD_LOGIC_VECTOR(3 downto 0);
-	signal MemToReg : STD_LOGIC;
 	signal EXResult : STD_LOGIC_VECTOR(15 downto 0);
 	signal MemDataB : STD_LOGIC_VECTOR(15 downto 0);
 
 begin
 
 	RegWriteOutput <= RegWrite;
+	MemReadOutput <= MemRead;
 	RegDestOutput <= RegDest;
-	MemToRegOutput <= MemToReg;
 	EXResultOutput <= EXResult;
 	MemDataBOutput <= MemDataB;
 
@@ -68,21 +68,21 @@ begin
 	begin
 		if (Reset = '1') then
 			RegWrite <= '0';
+			MemRead <= '0';
 			RegDest <= (others => '0');
-			MemToReg <= '0';
 			EXResult <= (others => '0');
 			MemDataB <= (others => '0');
 		elsif (RISING_EDGE(Clock)) then
 			if (Clear = '1') then
 				RegWrite <= '0';
+				MemRead <= '0';
 				RegDest <= (others => '0');
-				MemToReg <= '0';
 				EXResult <= (others => '0');
 				MemDataB <= (others => '0');
 			elsif (WriteEN = '1') then
 				RegWrite <= RegWriteInput;
+				MemRead <= MemReadInput;
 				RegDest <= RegDestInput;
-				MemToReg <= MemToRegInput;
 				EXResult <= EXResultInput;
 				MemDataB <= MemDataBInput;
 			end if;
