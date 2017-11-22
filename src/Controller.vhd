@@ -22,7 +22,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL;
+--use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -30,7 +30,8 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity Controller is
-	 Port(Instruction : in STD_LOGIC_VECTOR(15 downto 0);
+	Port( Instruction : in STD_LOGIC_VECTOR(15 downto 0);
+
 			RegWrite : out STD_LOGIC;
 			MemRead : out STD_LOGIC;
 			MemWrite : out STD_LOGIC;
@@ -51,8 +52,6 @@ architecture Behavioral of Controller is
 	signal rx : STD_LOGIC_VECTOR(2 downto 0);
 	signal ry : STD_LOGIC_VECTOR(2 downto 0);
 	signal rz : STD_LOGIC_VECTOR(2 downto 0);
-
-	constant ZERO : STD_LOGIC_VECTOR(15 downto 0) := "0000000000000000";
 
 begin
 
@@ -89,6 +88,9 @@ begin
 	MemRead <= first5 = "10011" -- LW
 			  or first5 = "10010"; -- LW_SP
 
+	MemToReg <= first5 = "10011" -- LW
+				or first5 = "10010"; -- LW_SP
+
 	MemWrite <= first5 = "11011" -- SW
 				or first5 = "11010"; -- SW_SP
 
@@ -100,83 +102,79 @@ begin
 					  "010" when first5 = "11101" and last8 = "00000000" else -- JR
 					  "000";
 
-	RegSrcA <= rx when first5 = "01001"
-						 or first5 = "01000" and Instruction(4) = '0'
-						 or first5 = "11100" and last2 = "01"
-						 or first5 = "11101" and last5 = "01100"
-						 or first5 = "00100"
-						 or first5 = "00101"
-						 or first5 = "11101" and last5 = "01010"
-						 or first5 = "11101" and last8 = "00000000"
-						 or first5 = "10011"
-						 or first5 = "11110" and last8 = "00000001"
-						 or first5 = "11101" and last5 = "01101"
-						 or first5 = "01010"
-						 or first5 = "01011"
-						 or first5 = "11100" and last2 = "11"
-						 or first5 = "11011" else
-				  ry when first8 = "01100100" and last5 = "00000"
-						 or first5 = "00110" and last2 = "00"
-						 or first5 = "00110" and last2 = "11"
-						 or first5 = "11101" and last5 = "00110" else
-			 "0010" when first8 = "01100011"
-						 or first5 = "10010"
-			 			 or first5 = "11010" else
-			 "0101" when first8 = "01100000"
-						 or first8 = "01100001" else
-			 "0010" when first5 = "10010"
-						 or first5 = "11010" else
-			 "0011" when first5 = "11110" and last8 = "00000000" else
-			 "0001" when first5 = "11101" and last8 = "01000000" else
+	RegSrcA <= rx when first5 = "01001" -- ADDIU
+						 or first5 = "01000" and Instruction(4) = '0' -- ADDIU3
+						 or first5 = "11100" and last2 = "01" -- ADDU
+						 or first5 = "11101" and last5 = "01100" -- AND
+						 or first5 = "00100" -- BEQZ
+						 or first5 = "00101" -- BNEZ
+						 or first5 = "11101" and last5 = "01010" -- CMP
+						 or first5 = "11101" and last8 = "00000000" -- JR
+						 or first5 = "10011" -- LW
+						 or first5 = "11110" and last8 = "00000001" -- MTIH
+						 or first5 = "11101" and last5 = "01101" -- OR
+						 or first5 = "01010" -- SLTI
+						 or first5 = "01011" -- SLTUI
+						 or first5 = "11100" and last2 = "11" -- SUBU
+						 or first5 = "11011" else -- SW
+				  ry when first8 = "01100100" and last5 = "00000" -- MTSP
+						 or first5 = "00110" and last2 = "00" -- SLL
+						 or first5 = "00110" and last2 = "11" -- SRA
+						 or first5 = "11101" and last5 = "00110" else -- SRLV
+			 "0010" when first8 = "01100011" -- ADDSP
+						 or first5 = "10010" -- LW_SP
+						 or first5 = "11010" else -- SW_SP
+			 "0101" when first8 = "01100000" -- BTEQZ
+						 or first8 = "01100001" else -- BTNEZ
+			 "0011" when first5 = "11110" and last8 = "00000000" else -- MFIH
+			 "0001" when first5 = "11101" and last8 = "01000000" else -- MFPC
 			 "0000";
 
-	RegSrcB <= rx when first5 = "11101" and last = "01011"
-						 or first5 = "11101" and last5 = "00110"
-						 or first5 = "11010" else
-				  ry when first5 = "11100" and last2 = "01"
-						 or first5 = "11101" and last5 = "01100"
-						 or first5 = "11101" and last5 = "01010"
-						 or first5 = "11101" and last5 = "01101"
-						 or first5 = "11100" and last2 = "11"
-						 or first5 = "11011" else
-				  "0000";
-
-	RegDest <= rx when first5 = "01001"
-						 or first5 = "11101" and last5 = "01100"
-						 or first5 = "01101"
-						 or first5 = "10010"
-						 or first5 = "11110" and last8 = "00000000"
-						 or first5 = "11101" and last8 = "01000000"
-						 or first5 = "11101" and last5 = "01101"
-						 or first5 = "00110" and last2 = "00"
-						 or first5 = "00110" and last2 = "11" else
-				  ry when first5 = "01000" and Instruction(4) = '0'
-						 or first5 = "10011"
-						 or first5 = "11101" and last = "01011"
-						 or first5 = "11101" and last5 = "00110" else
-				  rz when first5 = "11100" and last2 = "01"
-						 or first5 = "11100" and last2 = "11" else
-			 "0010" when first8 = "01100011"
-						 or first8 = "01100100" and last5 = "00000" else
-			 "0011" when first5 = "11110" and last8 = "00000001" else
-			 "0101" when first5 = "01010"
-						 or first5 = "01011" else
+	RegSrcB <= rx when first5 = "11101" and last5 = "01011" -- NEG
+						 or first5 = "11101" and last5 = "00110" -- SRLV
+						 or first5 = "11010" else -- SW_SP
+				  ry when first5 = "11100" and last2 = "01" -- ADDU
+						 or first5 = "11101" and last5 = "01100" -- AND
+						 or first5 = "11101" and last5 = "01010" -- CMP
+						 or first5 = "11101" and last5 = "01101" -- OR
+						 or first5 = "11100" and last2 = "11" -- SUBU
+						 or first5 = "11011" else -- SW
 			 "0000";
 
-	UseImm <= first5 = "01001"
-			 or first5 = "01000" and Instruction(4) = '0'
-			 or first8 = "01100011"
-			 or first5 = "01101"
-			 or first5 = "10011"
-			 or first5 = "10010"
-			 or first5 = "00110" and last2 = "00"
-			 or first5 = "01010"
-			 or first5 = "01011"
-			 or first5 = "00110" and last2 = "11"
-			 or first5 = "11011"
-			 or first5 = "11010";
+	RegDest <= rx when first5 = "01001" -- ADDIU
+						 or first5 = "11101" and last5 = "01100" -- AND
+						 or first5 = "01101" -- LI
+						 or first5 = "10010" -- LW_SP
+						 or first5 = "11110" and last8 = "00000000" -- MFIH
+						 or first5 = "11101" and last8 = "01000000" -- MFPC
+						 or first5 = "11101" and last5 = "01101" -- OR
+						 or first5 = "00110" and last2 = "00" -- SLL
+						 or first5 = "00110" and last2 = "11" else -- SRA
+				  ry when first5 = "01000" and Instruction(4) = '0' -- ADDIU
+						 or first5 = "10011" -- LW
+						 or first5 = "11101" and last5 = "01011" -- NEG
+						 or first5 = "11101" and last5 = "00110" else -- SRLV
+				  rz when first5 = "11100" and last2 = "01" -- ADDU
+						 or first5 = "11100" and last2 = "11" else -- SUBU
+			 "0010" when first8 = "01100011" -- ADDSP
+						 or first8 = "01100100" and last5 = "00000" else -- MTSP
+			 "0011" when first5 = "11110" and last8 = "00000001" else -- MTIH
+			 "0101" when first5 = "11101" and last5 = "01010" -- CMP
+						 or first5 = "01010" -- SLTI
+						 or first5 = "01011" else -- SLTUI
+			 "0000";
 
-	MemToReg <= first5 = "10011" -- LW
-				or first5 = "10010"; -- LW_SP
+	UseImm <= first5 = "01001" -- ADDIU
+			 or first5 = "01000" and Instruction(4) = '0' -- ADDIU3
+			 or first8 = "01100011" -- ADDSP
+			 or first5 = "01101" -- LI
+			 or first5 = "10011" -- LW
+			 or first5 = "10010" -- LW_SP
+			 or first5 = "00110" and last2 = "00" -- SLL
+			 or first5 = "01010" -- SLTI
+			 or first5 = "01011" -- SLTUI
+			 or first5 = "00110" and last2 = "11" -- SRA
+			 or first5 = "11011" -- SW
+			 or first5 = "11010"; -- SW_SP
 
 end Behavioral;
