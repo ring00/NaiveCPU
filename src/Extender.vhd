@@ -22,7 +22,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL;
+--use IEEE.NUMERIC_STD.ALL;
 use IEEE.STD_LOGIC_ARITH.all;
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -56,22 +56,22 @@ begin
 	last8 <= Instruction(7 downto 0);
 	from4to2 <= Instruction(4 downto 2);
 
-	Extended <= SXT(last8, SIZE) when first5 = "01001"
-											 or first8 = "01100011"
-											 or first5 = "00100"
-											 or first5 = "00101"
-											 or first8 = "01100000"
-											 or first8 = "01100001"
-											 or first5 = "10010"
-											 or first5 = "01010"
-											 or first5 = "11010" else
-					EXT(last8, SIZE) when first5 = "01101"
-											 or first5 = "01011" else
-					SXT(last4, SIZE) when first5 = "01000" and Instruction(4) = '0' else
-					SXT(last5, SIZE) when first5 = "10011"
-											 or first5 = "11011" else
-					EXT(from4to2, SIZE) when first5 = "00110" and last2 = "00"
-												 or first5 = "00110" and last2 = "11" else
+	Extended <= SXT(last8, SIZE) when first5 = "01001" -- ADDIU
+											 or first8 = "01100011" -- ADDSP
+											 or first5 = "00100" -- BEQZ
+											 or first5 = "00101" -- BNEZ
+											 or first8 = "01100000" -- BTEQZ
+											 or first8 = "01100001" -- BTNEZ
+											 or first5 = "10010" -- LW_SP
+											 or first5 = "01010" -- SLTI
+											 or first5 = "11010" else -- SW_SP
+					EXT(last8, SIZE) when first5 = "01101" -- LI
+											 or first5 = "01011" else -- SLTUI
+					SXT(last4, SIZE) when first5 = "01000" and Instruction(4) = '0' else -- ADDIU3
+					SXT(last5, SIZE) when first5 = "10011" -- LW
+											 or first5 = "11011" else -- SW
+					EXT(from4to2, SIZE) when first5 = "00110" and last2 = "00" -- SLL
+												 or first5 = "00110" and last2 = "11" else -- SRA
 					(others => '0');
 
 end Behavioral;
