@@ -52,13 +52,13 @@ end EXMEM;
 
 architecture Behavioral of EXMEM is
 
-	RegWrite : STD_LOGIC;
-	MemRead : STD_LOGIC;
-	MemWrite : STD_LOGIC;
-	RegDest : STD_LOGIC_VECTOR(3 downto 0);
-	MemToReg : STD_LOGIC;
-	EXResult : STD_LOGIC_VECTOR(15 downto 0);
-	RegDataB : STD_LOGIC_VECTOR(15 downto 0);
+	signal RegWrite : STD_LOGIC;
+	signal MemRead : STD_LOGIC;
+	signal MemWrite : STD_LOGIC;
+	signal RegDest : STD_LOGIC_VECTOR(3 downto 0);
+	signal MemToReg : STD_LOGIC;
+	signal EXResult : STD_LOGIC_VECTOR(15 downto 0);
+	signal RegDataB : STD_LOGIC_VECTOR(15 downto 0);
 
 begin
 
