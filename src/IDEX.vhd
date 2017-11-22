@@ -50,20 +50,20 @@ entity IDEX is
 			 RegDataAInput : in STD_LOGIC_VECTOR(15 downto 0);
 			 RegDataBInput : in STD_LOGIC_VECTOR(15 downto 0);
 
-			 PCOutput : in STD_LOGIC_VECTOR(15 downto 0);
-			 RegWriteOutput : in STD_LOGIC;
-			 MemReadOutput : in STD_LOGIC;
-			 MemWriteOutput : in STD_LOGIC;
-			 BranchTypeOutput : in STD_LOGIC_VECTOR(2 downto 0);
-			 RegSrcAOutput : in STD_LOGIC_VECTOR(3 downto 0);
-			 RegSrcBOutput : in STD_LOGIC_VECTOR(3 downto 0);
-			 RegDestOutput : in STD_LOGIC_VECTOR(3 downto 0);
-			 UseImmOutput : in STD_LOGIC;
-			 MemToRegOutput : in STD_LOGIC;
-			 ExtendedOutput : in STD_LOGIC_VECTOR(15 downto 0);
-			 ALUopOutput : in STD_LOGIC_VECTOR(3 downto 0);
-			 RegDataAOutput : in STD_LOGIC_VECTOR(15 downto 0);
-			 RegDataBOutput : in STD_LOGIC_VECTOR(15 downto 0));
+			 PCOutput : out STD_LOGIC_VECTOR(15 downto 0);
+			 RegWriteOutput : out STD_LOGIC;
+			 MemReadOutput : out STD_LOGIC;
+			 MemWriteOutput : out STD_LOGIC;
+			 BranchTypeOutput : out STD_LOGIC_VECTOR(2 downto 0);
+			 RegSrcAOutput : out STD_LOGIC_VECTOR(3 downto 0);
+			 RegSrcBOutput : out STD_LOGIC_VECTOR(3 downto 0);
+			 RegDestOutput : out STD_LOGIC_VECTOR(3 downto 0);
+			 UseImmOutput : out STD_LOGIC;
+			 MemToRegOutput : out STD_LOGIC;
+			 ExtendedOutput : out STD_LOGIC_VECTOR(15 downto 0);
+			 ALUopOutput : out STD_LOGIC_VECTOR(3 downto 0);
+			 RegDataAOutput : out STD_LOGIC_VECTOR(15 downto 0);
+			 RegDataBOutput : out STD_LOGIC_VECTOR(15 downto 0));
 end IDEX;
 
 architecture Behavioral of IDEX is
@@ -103,8 +103,20 @@ begin
 	Update : process (Reset, Clock)
 	begin
 		if (Reset = '1') then
-			Instruction <= (others => '0');
 			PC <= (others => '0');
+			RegWrite <= '0';
+			MemRead <= '0';
+			MemWrite <= '0';
+			BranchType <= (others => '0');
+			RegSrcA <= (others => '0');
+			RegSrcB <= (others => '0');
+			RegDest <= (others => '0');
+			UseImm <= '0';
+			MemToReg <= '0';
+			Extended <= (others => '0');
+			ALUop <= (others => '0');
+			RegDataA <= (others => '0');
+			RegDataB <= (others => '0');
 		elsif (RISING_EDGE(Clock)) then
 			if (Clear = '1') then
 				PC <= (others => '0');
