@@ -30,38 +30,38 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity IDEX is
-	 Port (Clock : in STD_LOGIC;
-			 Reset : in STD_LOGIC;
-			 Clear : in STD_LOGIC;
-			 WriteEN : in STD_LOGIC;
+	Port (Clock : in STD_LOGIC;
+			Reset : in STD_LOGIC;
+			Clear : in STD_LOGIC;
+			WriteEN : in STD_LOGIC;
 
-			 PCInput : in STD_LOGIC_VECTOR(15 downto 0);
-			 RegWriteInput : in STD_LOGIC;
-			 MemReadInput : in STD_LOGIC;
-			 MemWriteInput : in STD_LOGIC;
-			 BranchTypeInput : in STD_LOGIC_VECTOR(2 downto 0);
-			 RegSrcAInput : in STD_LOGIC_VECTOR(3 downto 0);
-			 RegSrcBInput : in STD_LOGIC_VECTOR(3 downto 0);
-			 RegDestInput : in STD_LOGIC_VECTOR(3 downto 0);
-			 UseImmInput : in STD_LOGIC;
-			 ExtendedInput : in STD_LOGIC_VECTOR(15 downto 0);
-			 ALUopInput : in STD_LOGIC_VECTOR(3 downto 0);
-			 RegDataAInput : in STD_LOGIC_VECTOR(15 downto 0);
-			 RegDataBInput : in STD_LOGIC_VECTOR(15 downto 0);
+			PCInput : in STD_LOGIC_VECTOR(15 downto 0);
+			RegWriteInput : in STD_LOGIC;
+			MemReadInput : in STD_LOGIC;
+			MemWriteInput : in STD_LOGIC;
+			BranchTypeInput : in STD_LOGIC_VECTOR(2 downto 0);
+			RegSrcAInput : in STD_LOGIC_VECTOR(3 downto 0);
+			RegSrcBInput : in STD_LOGIC_VECTOR(3 downto 0);
+			RegDestInput : in STD_LOGIC_VECTOR(3 downto 0);
+			UseImmInput : in STD_LOGIC;
+			ExtendedInput : in STD_LOGIC_VECTOR(15 downto 0);
+			ALUopInput : in STD_LOGIC_VECTOR(3 downto 0);
+			RegDataAInput : in STD_LOGIC_VECTOR(15 downto 0);
+			RegDataBInput : in STD_LOGIC_VECTOR(15 downto 0);
 
-			 PCOutput : out STD_LOGIC_VECTOR(15 downto 0);
-			 RegWriteOutput : out STD_LOGIC;
-			 MemReadOutput : out STD_LOGIC;
-			 MemWriteOutput : out STD_LOGIC;
-			 BranchTypeOutput : out STD_LOGIC_VECTOR(2 downto 0);
-			 RegSrcAOutput : out STD_LOGIC_VECTOR(3 downto 0);
-			 RegSrcBOutput : out STD_LOGIC_VECTOR(3 downto 0);
-			 RegDestOutput : out STD_LOGIC_VECTOR(3 downto 0);
-			 UseImmOutput : out STD_LOGIC;
-			 ExtendedOutput : out STD_LOGIC_VECTOR(15 downto 0);
-			 ALUopOutput : out STD_LOGIC_VECTOR(3 downto 0);
-			 RegDataAOutput : out STD_LOGIC_VECTOR(15 downto 0);
-			 RegDataBOutput : out STD_LOGIC_VECTOR(15 downto 0));
+			PCOutput : out STD_LOGIC_VECTOR(15 downto 0);
+			RegWriteOutput : out STD_LOGIC;
+			MemReadOutput : out STD_LOGIC;
+			MemWriteOutput : out STD_LOGIC;
+			BranchTypeOutput : out STD_LOGIC_VECTOR(2 downto 0);
+			RegSrcAOutput : out STD_LOGIC_VECTOR(3 downto 0);
+			RegSrcBOutput : out STD_LOGIC_VECTOR(3 downto 0);
+			RegDestOutput : out STD_LOGIC_VECTOR(3 downto 0);
+			UseImmOutput : out STD_LOGIC;
+			ExtendedOutput : out STD_LOGIC_VECTOR(15 downto 0);
+			ALUopOutput : out STD_LOGIC_VECTOR(3 downto 0);
+			RegDataAOutput : out STD_LOGIC_VECTOR(15 downto 0);
+			RegDataBOutput : out STD_LOGIC_VECTOR(15 downto 0));
 end IDEX;
 
 architecture Behavioral of IDEX is
