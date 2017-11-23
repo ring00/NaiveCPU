@@ -363,6 +363,8 @@ begin
 		PCOutput => IFPC
 	);
 
+	InstAddress <= IFPC;
+
 	IFAdderInstance : Adder port map (
 		InputA => IFPC,
 		InputB => x"0001",
@@ -372,7 +374,8 @@ begin
 	IFMuxInstance : Mux port map (
 		Sel => EXBranch,
 		InputA => IFAdderOutput,
-		InputB => EXAddress
+		InputB => EXAddress,
+		Output => IFMuxOutput
 	);
 
 	StallUnitInstance : StallUnit port map (
@@ -380,6 +383,7 @@ begin
 		Misprediction => EXBranch,
 		PCWriteEN => PCWriteEN,
 		IFIDWriteEN => IFIDWriteEN,
+		IDEXWriteEN => IDEXWriteEN,
 		EXMEMWriteEN => EXMEMWriteEN,
 		MEMWBWriteEN => MEMWBWriteEN,
 		PCClear => PCClear,
@@ -592,7 +596,8 @@ begin
 	WBMuxInstance : Mux port map (
 		Sel => MEMWBMemRead,
 		InputA => MEMWBEXResult,
-		InputB => MEMWBMemDataB
+		InputB => MEMWBMemDataB,
+		Output => WBMuxOutput
 	);
 
 -- WB END

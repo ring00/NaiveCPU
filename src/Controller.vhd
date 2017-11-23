@@ -59,6 +59,7 @@ begin
 	first8 <= Instruction(15 downto 8);
 	last5 <= Instruction(4 downto 0);
 	last8 <= Instruction(7 downto 0);
+	last2 <= Instruction(1 downto 0);
 
 	rx <= '1' & Instruction(10 downto 8);
 	ry <= '1' & Instruction(7 downto 5);
@@ -78,7 +79,7 @@ begin
 							or (first8 = "01100100" and last5 = "00000") -- MTSP
 							or (first5 = "11101" and last5 = "01011") -- NEG
 							or (first5 = "11101" and last5 = "01101") -- OR
-							or (first5 = "00110" and last2 = "01101") -- SLL
+							or (first5 = "00110" and last2 = "00") -- SLL
 							or first5 = "01010" -- SLTI
 							or first5 = "01011" -- SLTUI
 							or (first5 = "00110" and last2 = "11") -- SRA

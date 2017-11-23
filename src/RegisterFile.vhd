@@ -45,7 +45,7 @@ end RegisterFile;
 
 architecture Behavioral of RegisterFile is
 
-	type RegisterArray is array(0 to 11) of STD_LOGIC_VECTOR(15 downto 0);
+	type RegisterArray is array(0 to 15) of STD_LOGIC_VECTOR(15 downto 0);
 	signal Registers : RegisterArray;
 
 begin

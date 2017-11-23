@@ -41,7 +41,8 @@ entity NorthBridge is
 			MemWriteEN : in STD_LOGIC;
 			MemReadEN : in STD_LOGIC;
 			DataAddress : in STD_LOGIC_VECTOR(15 downto 0);
-			DataOutput : in STD_LOGIC_VECTOR(15 downto 0);
+			DataInput : in STD_LOGIC_VECTOR(15 downto 0);
+			DataOutput : out STD_LOGIC_VECTOR(15 downto 0);
 
 			Ram1OE : out STD_LOGIC;
 			Ram1WE : out STD_LOGIC;
@@ -50,7 +51,6 @@ entity NorthBridge is
 			Ram1Data : inout STD_LOGIC_VECTOR(15 downto 0);
 
 			SerialDataReady : in STD_LOGIC;
-			SerialData : inout STD_LOGIC_VECTOR(7 downto 0);
 			SerialRDN : out STD_LOGIC;
 			SerialWRN : out STD_LOGIC;
 			SerialTBRE : in STD_LOGIC;
@@ -68,10 +68,10 @@ architecture Behavioral of NorthBridge is
 	type STATE_TYPE is (DATA_SETUP, MEM_ACCESS, INST_FETCH);
 	signal state : STATE_TYPE;
 
-	signal Ram1DataBuffer : STD_LOGIC_VECTOR(15 downto 0); -- not used
+	--signal Ram1DataBuffer : STD_LOGIC_VECTOR(15 downto 0); -- not used
 	signal Ram2DataBuffer : STD_LOGIC_VECTOR(15 downto 0);
-
-	--signal DataOutputBuffer : STD_LOGIC_VECTOR(15 downto 0);
+	signal SerialData : STD_LOGIC_VECTOR(7 downto 0);
+	--signal DataInputBuffer : STD_LOGIC_VECTOR(15 downto 0);
 
 begin
 
@@ -79,7 +79,7 @@ begin
 	Ram1WE <= '1';
 	Ram1OE <= '1';
 	Ram1Addr <= (others => 'Z');
-	Ram1Data <= Ram2Data; -- directly linked to RAM2 data line
+	Ram1Data <= x"00" & SerialData; -- directly linked to RAM2 data line
 
 	Ram2EN <= '1';
 	Ram2WE <= '1' when ((DataAddress = x"BF00" or DataAddress = x"BF01" or DataAddress = x"BF02" or DataAddress = x"BF03") and state = MEM_ACCESS) else
@@ -88,19 +88,23 @@ begin
 	Ram2OE <= '1' when ((DataAddress = x"BF00" or DataAddress = x"BF01" or DataAddress = x"BF02" or DataAddress = x"BF03") and state = MEM_ACCESS) else
 				 not MemReadEN when (state = MEM_ACCESS) else
 				 '1';
-	Ram2Addr <= "00" & DataAddress;
-	Ram2Data <= DataOutput when (MemWriteEN = '1' and (state = DATA_SETUP or state = MEM_ACCESS)) else
+	Ram2Addr <= "00" & InstAddress when state = INST_FETCH else
+					"00" & DataAddress;
+	Ram2Data <= DataInput when (MemWriteEN = '1' and (state = DATA_SETUP or state = MEM_ACCESS)) else
 					(others => 'Z');
 
 	SerialWRN <= not MemWriteEN when (DataAddress = x"BF00" and (state = DATA_SETUP or state = MEM_ACCESS)) else
 					 '1';
 	SerialRDN <= not MemReadEN when (DataAddress = x"BF00" and (state = DATA_SETUP or state = MEM_ACCESS)) else
 					 '1';
-	SerialData <= DataOutput(7 downto 0) when (MemWriteEN = '1' and (state = DATA_SETUP or state = MEM_ACCESS)) else
+	SerialData <= DataInput(7 downto 0) when (MemWriteEN = '1' and (state = DATA_SETUP or state = MEM_ACCESS)) else
 					  (others => 'Z');
 
 	CPUClock <= '0' when (state = INST_FETCH) else
 					'1';
+
+	InstData <= Ram2Data;
+	DataOutput <= Ram2DataBuffer;
 
 	Update : process(Clock, Reset)
 	begin
