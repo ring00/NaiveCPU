@@ -41,12 +41,13 @@ architecture Behavioral of BranchSelector is
 begin
 
 	with BranchType select Address <=
-		RegisterInput when BranchType = "010", -- JR
+		RegisterInput when "010", -- JR
 		BranchInput when others; -- B, BEQZ, BNEZ, BTEQZ, BTNEZ
 
-	Branch <= BranchType = "001"
-			 or BranchType = "010"
-			 or BranchType = "011" and RegisterInput = x"0000"
-			 or BranchType = "100" and RegisterInput /= x"0000";
+	Branch <= '1' when BranchType = "001"
+						 or BranchType = "010"
+						 or (BranchType = "011" and RegisterInput = x"0000")
+						 or (BranchType = "100" and RegisterInput /= x"0000") else
+				 '0';
 
 end Behavioral;
