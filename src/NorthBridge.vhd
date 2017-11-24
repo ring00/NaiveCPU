@@ -30,114 +30,213 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity NorthBridge is
-	Port (Clock : in STD_LOGIC;
-			Reset : in STD_LOGIC;
+	port (Clock : in std_logic;
+			Reset : in std_logic;
+			CPUClock : out std_logic;
 
-			CPUClock : out STD_LOGIC;
+			ReadEN : in std_logic;
+			WriteEN : in std_logic;
 
-			InstAddress : in STD_LOGIC_VECTOR(15 downto 0);
-			InstData : out STD_LOGIC_VECTOR(15 downto 0);
+			Address1 : in std_logic_vector(15 downto 0);
+			DataOutput1 : out std_logic_vector(15 downto 0);
 
-			MemWriteEN : in STD_LOGIC;
-			MemReadEN : in STD_LOGIC;
-			DataAddress : in STD_LOGIC_VECTOR(15 downto 0);
-			DataInput : in STD_LOGIC_VECTOR(15 downto 0);
-			DataOutput : out STD_LOGIC_VECTOR(15 downto 0);
+			Address2 : in std_logic_vector(15 downto 0);
+			DataInput2 : in std_logic_vector(15 downto 0);
+			DataOutput2 : out std_logic_vector(15 downto 0);
 
-			Ram1OE : out STD_LOGIC;
-			Ram1WE : out STD_LOGIC;
-			Ram1EN : out STD_LOGIC;
-			Ram1Addr : out STD_LOGIC_VECTOR(17 downto 0);
-			Ram1Data : inout STD_LOGIC_VECTOR(15 downto 0);
+			MemoryAddress : out std_logic_vector(17 downto 0);
+			MemoryDataBus : inout std_logic_vector(15 downto 0);
+			MemoryEN : out std_logic;
+			MemoryOE : out std_logic;
+			MemoryWE : out std_logic;
 
-			SerialDataReady : in STD_LOGIC;
-			SerialRDN : out STD_LOGIC;
-			SerialWRN : out STD_LOGIC;
-			SerialTBRE : in STD_LOGIC;
-			SerialTSRE : in STD_LOGIC;
+			RAM1EN : out std_logic;
 
-			Ram2OE : out STD_LOGIC;
-			Ram2WE : out STD_LOGIC;
-			Ram2EN : out STD_LOGIC;
-			Ram2Addr : out STD_LOGIC_VECTOR(17 downto 0);
-			Ram2Data : inout STD_LOGIC_VECTOR(15 downto 0));
+			SerialWRN : out std_logic;
+			SerialRDN : out std_logic;
+			SerialDATA_READY : in std_logic;
+			SerialTSRE : in std_logic;
+			SerialTBRE : in std_logic;
+			SerialDataBus : inout std_logic_vector(7 downto 0);
+
+			FlashByte : out std_logic;
+			FlashVpen : out std_logic;
+			FlashCE : out std_logic;
+			FlashOE : out std_logic;
+			FlashWE : out std_logic;
+			FlashRP : out std_logic;
+			FlashAddr : out std_logic_vector(22 downto 0);
+			FlashData : inout std_logic_vector(15 downto 0);
+
+			LEDOut : out std_logic_vector(15 downto 0));
 end NorthBridge;
 
 architecture Behavioral of NorthBridge is
 
-	type STATE_TYPE is (DATA_SETUP, MEM_ACCESS, INST_FETCH);
+	component FlashAdapter
+		port (Clock : in std_logic;
+				Reset : in std_logic;
+				Address : in std_logic_vector(22 downto 0);
+				OutputData : out std_logic_vector(15 downto 0);
+				ctl_read : in std_logic;
+
+				FlashByte : out std_logic;
+				FlashVpen : out std_logic;
+				FlashCE : out std_logic;
+				FlashOE : out std_logic;
+				FlashWE : out std_logic;
+				FlashRP : out std_logic;
+
+				FlashAddr : out std_logic_vector(22 downto 0);
+				FlashData : inout std_logic_vector(15 downto 0)
+		);
+	end component;
+
+	type STATE_TYPE is (BOOT, BOOT_START, BOOT_FLASH, BOOT_RAM, BOOT_COMPLETE, DATA_PRE, DATA_RW, INS_READ);
 	signal state : STATE_TYPE;
 
-	--signal Ram1DataBuffer : STD_LOGIC_VECTOR(15 downto 0); -- not used
-	signal Ram2DataBuffer : STD_LOGIC_VECTOR(15 downto 0);
-	signal SerialData : STD_LOGIC_VECTOR(7 downto 0);
-	--signal DataInputBuffer : STD_LOGIC_VECTOR(15 downto 0);
+	signal BufferData1, BufferData2 : std_logic_vector(15 downto 0);
+	signal BF01 : std_logic_vector(15 downto 0);
+	signal BF03 : std_logic_vector(15 downto 0);
+
+	signal MemoryBusFlag, SerialBusFlag : std_logic;
+	signal MemoryBusHolder : std_logic_vector(15 downto 0);
+
+	signal FlashBootMemAddr : std_logic_vector(15 downto 0);
+	signal FlashBootAddr : std_logic_vector(22 downto 0);
+	signal FlashAddrInput : std_logic_vector(22 downto 0);
+	signal FlashDataOutput : std_logic_vector(15 downto 0);
+
+	signal FlashTimer : std_logic_vector(7 downto 0);
+	signal FlashReadData : std_logic_vector(15 downto 0);
+	signal ctl_read : std_logic;
 
 begin
 
-	Ram1EN <= '1';
-	Ram1WE <= '1';
-	Ram1OE <= '1';
-	Ram1Addr <= (others => 'Z');
-	Ram1Data <= x"00" & SerialData; -- directly linked to RAM2 data line
+	FlashAdapter_c : FlashAdapter port map (
+		Clock => Clock,
+		Reset => Reset,
+		Address => FlashAddrInput,
+		OutputData => FlashDataOutput,
+		ctl_read => ctl_read,
 
-	Ram2EN <= '1';
-	Ram2WE <= '1' when ((DataAddress = x"BF00" or DataAddress = x"BF01" or DataAddress = x"BF02" or DataAddress = x"BF03") and state = MEM_ACCESS) else
-				 not MemWriteEN when (state = MEM_ACCESS) else
-				 '1';
-	Ram2OE <= '1' when ((DataAddress = x"BF00" or DataAddress = x"BF01" or DataAddress = x"BF02" or DataAddress = x"BF03") and state = MEM_ACCESS) else
-				 not MemReadEN when (state = MEM_ACCESS) else
-				 '1';
-	Ram2Addr <= "00" & InstAddress when state = INST_FETCH else
-					"00" & DataAddress;
-	Ram2Data <= DataInput when (MemWriteEN = '1' and (state = DATA_SETUP or state = MEM_ACCESS)) else
-					(others => 'Z');
+		FlashByte => FlashByte,
+		FlashVpen => FlashVpen,
+		FlashCE => FlashCE,
+		FlashOE => FlashOE,
+		FlashWE => FlashWE,
+		FlashRP => FlashRP,
 
-	SerialWRN <= not MemWriteEN when (DataAddress = x"BF00" and (state = DATA_SETUP or state = MEM_ACCESS)) else
-					 '1';
-	SerialRDN <= not MemReadEN when (DataAddress = x"BF00" and (state = DATA_SETUP or state = MEM_ACCESS)) else
-					 '1';
-	SerialData <= DataInput(7 downto 0) when (MemWriteEN = '1' and (state = DATA_SETUP or state = MEM_ACCESS)) else
-					  (others => 'Z');
+		FlashAddr => FlashAddr,
+		FlashData => FlashData
+	);
 
-	CPUClock <= '0' when (state = INST_FETCH) else
+	LEDOut <= FlashBootMemAddr;
+
+	MemoryEN <= '0';
+	RAM1EN <= '1';
+
+	DataOutput1 <= MemoryDataBus;
+	DataOutput2 <= BufferData2;
+
+	CPUClock <= '0' when state=INS_READ else '1';
+
+	MemoryWE <= '1' when (Address2=x"BF00" and state=DATA_RW) else
+				'1' when (Address2=x"BF01" and state=DATA_RW) else
+				'1' when (Address2=x"BF02" and state=DATA_RW) else
+				'1' when (Address2=x"BF03" and state=DATA_RW) else
+				not WriteEN when state=DATA_RW else
+				'0' when state=BOOT_RAM else
+				'1';
+	MemoryOE <= not ReadEN when state=DATA_RW else
+				'0' when state=INS_READ else
+				'1';
+
+	MemoryBusFlag <= not WriteEN when (state=DATA_PRE or state=DATA_RW) else
+					'0' when (state=BOOT_RAM or state=BOOT_FLASH) else
 					'1';
+	SerialBusFlag <= not WriteEN;
+	MemoryBusHolder <= FlashReadData when (state=BOOT_FLASH or state=BOOT_RAM) else DataInput2;
+	MemoryDataBus <= MemoryBusHolder when MemoryBusFlag='0' else (others => 'Z');
+	SerialDataBus <= DataInput2(7 downto 0) when SerialBusFlag='0' else (others => 'Z');
 
-	InstData <= Ram2Data;
-	DataOutput <= Ram2DataBuffer;
+	MemoryAddress <= "00" & FlashBootMemAddr when (state=BOOT_FLASH or state=BOOT_RAM) else
+					"00" & Address1 when state=INS_READ else
+					"00" & Address2;
 
-	Update : process(Clock, Reset)
+	SerialRDN <= not ReadEN when (Address2=x"BF00" and (state=DATA_PRE or state=DATA_RW)) else '1';
+	SerialWRN <= not WriteEN when (Address2=x"BF00" and (state=INS_READ or state=DATA_RW)) else '1';
+
+	BF01 <= "00000000000000" & SerialDATA_READY & (SerialTSRE and SerialTBRE);
+	BF03 <= (others => '0');
+
+	ctl_read <= '0' when state=BOOT_FLASH else '1';
+
+	process (Clock, Reset)
 	begin
-		if (Reset = '1') then
-			state <= DATA_SETUP;
-		elsif (rising_edge(Clock)) then
+		if Reset = '1' then
+			state <= BOOT_START;
+		elsif rising_edge(Clock) then
 			case state is
-				when DATA_SETUP =>
-					if (MemReadEN = '1' or MemWriteEN = '1') then
-						state <= MEM_ACCESS;
-					else
-						state <= INST_FETCH;
-					end if;
-				when MEM_ACCESS =>
-					case DataAddress is
-						when x"BF00" =>
-							Ram2DataBuffer <= x"00" & SerialData;
-						when x"BF01" =>
-							Ram2DataBuffer <= "00000000000000" & SerialDataReady & (SerialTBRE and SerialTSRE);
-						when x"BF02" =>
-							Ram2DataBuffer <= x"DEAD";
-						when x"BF03" =>
-							Ram2DataBuffer <= x"BEEF";
+				when BOOT =>
+					state <= BOOT;
+				when BOOT_START =>
+					state <= BOOT_FLASH;
+					FlashTimer <= "00000000";
+					FlashBootMemAddr <= (others => '0');
+					FlashBootAddr <= "00000000000000000000000";
+				when BOOT_FLASH =>
+					case FlashTimer is
+						when "00000000" =>
+							FlashAddrInput <= FlashBootAddr;
+							FlashTimer <= FlashTimer + 1;
+							state <= BOOT_FLASH;
+						when "11111111" =>
+							state <= BOOT_RAM;
+							FlashReadData <= FlashDataOutput;
+							FlashTimer <= "00000000";
 						when others =>
-							Ram2DataBuffer <= Ram2Data;
+							FlashTimer <= FlashTimer + 1;
+							state <= BOOT_FLASH;
 					end case;
-				when INST_FETCH =>
-					state <= DATA_SETUP;
+				when BOOT_RAM =>
+					FlashBootAddr <= FlashBootAddr + 2;
+					FlashBootMemAddr <= FlashBootMemAddr + 1;
+					if FlashBootMemAddr < x"0FFF" then
+						state <= BOOT_FLASH;
+					else
+						state <= BOOT_COMPLETE;
+					end if;
+				when BOOT_COMPLETE =>
+					state <= DATA_PRE;
+				when DATA_PRE =>
+					if ReadEN='1' or WriteEN='1' then
+						state <= DATA_RW;
+					else
+						state <= INS_READ;
+					end if;
+				when DATA_RW =>
+					state <= INS_READ;
+					case Address2 is
+						when x"BF00" =>
+							BufferData2 <= "00000000" & SerialDataBus;
+						when x"BF01" =>
+							BufferData2 <= BF01;
+						when x"BF02" =>
+							BufferData2 <= (others => '0');
+						when x"BF03" =>
+							BufferData2 <= BF03;
+						when others =>
+							BufferData2 <= MemoryDataBus;
+					end case;
+				when INS_READ =>
+					state <= DATA_PRE;
+					BufferData1 <= MemoryDataBus;
 				when others =>
-					state <= DATA_SETUP;
+					state <= BOOT;
 			end case;
 		end if;
-	end process ; -- Update
+	end process;
 
 end Behavioral;
 

@@ -49,7 +49,18 @@ entity CPUTop is
 			SerialRDN : out STD_LOGIC;
 			SerialWRN : out STD_LOGIC;
 			SerialTBRE : in STD_LOGIC;
-			SerialTSRE : in STD_LOGIC);
+			SerialTSRE : in STD_LOGIC
+
+			FlashByte : out std_logic;
+			FlashVpen : out std_logic;
+			FlashCE : out std_logic;
+			FlashOE : out std_logic;
+			FlashWE : out std_logic;
+			FlashRP : out std_logic;
+			FlashAddr : out std_logic_vector(22 downto 0);
+			FlashData : inout std_logic_vector(15 downto 0)
+
+			LED : out std_logic_vector (15 downto 0));
 end CPUTop;
 
 architecture Behavioral of CPUTop is
@@ -76,37 +87,45 @@ architecture Behavioral of CPUTop is
 	signal MemWriteEN : STD_LOGIC;
 
 	component NorthBridge is
-		Port (Clock : in STD_LOGIC;
-				Reset : in STD_LOGIC;
+		port (Clock : in std_logic;
+				Reset : in std_logic;
+				CPUClock : out std_logic;
 
-				CPUClock : out STD_LOGIC;
+				ReadEN : in std_logic;
+				WriteEN : in std_logic;
 
-				InstAddress : in STD_LOGIC_VECTOR(15 downto 0);
-				InstData : out STD_LOGIC_VECTOR(15 downto 0);
+				Address1 : in std_logic_vector(15 downto 0);
+				DataOutput1 : out std_logic_vector(15 downto 0);
 
-				MemWriteEN : in STD_LOGIC;
-				MemReadEN : in STD_LOGIC;
-				DataAddress : in STD_LOGIC_VECTOR(15 downto 0);
-				DataInput : in STD_LOGIC_VECTOR(15 downto 0);
-				DataOutput : out STD_LOGIC_VECTOR(15 downto 0);
+				Address2 : in std_logic_vector(15 downto 0);
+				DataInput2 : in std_logic_vector(15 downto 0);
+				DataOutput2 : out std_logic_vector(15 downto 0);
 
-				Ram1OE : out STD_LOGIC;
-				Ram1WE : out STD_LOGIC;
-				Ram1EN : out STD_LOGIC;
-				Ram1Addr : out STD_LOGIC_VECTOR(17 downto 0);
-				Ram1Data : inout STD_LOGIC_VECTOR(15 downto 0);
+				MemoryAddress : out std_logic_vector(17 downto 0);
+				MemoryDataBus : inout std_logic_vector(15 downto 0);
+				MemoryEN : out std_logic;
+				MemoryOE : out std_logic;
+				MemoryWE : out std_logic;
 
-				SerialDataReady : in STD_LOGIC;
-				SerialRDN : out STD_LOGIC;
-				SerialWRN : out STD_LOGIC;
-				SerialTBRE : in STD_LOGIC;
-				SerialTSRE : in STD_LOGIC;
+				RAM1EN : out std_logic;
 
-				Ram2OE : out STD_LOGIC;
-				Ram2WE : out STD_LOGIC;
-				Ram2EN : out STD_LOGIC;
-				Ram2Addr : out STD_LOGIC_VECTOR(17 downto 0);
-				Ram2Data : inout STD_LOGIC_VECTOR(15 downto 0));
+				SerialWRN : out std_logic;
+				SerialRDN : out std_logic;
+				SerialDATA_READY : in std_logic;
+				SerialTSRE : in std_logic;
+				SerialTBRE : in std_logic;
+				SerialDataBus : inout std_logic_vector(7 downto 0);
+
+				FlashByte : out std_logic;
+				FlashVpen : out std_logic;
+				FlashCE : out std_logic;
+				FlashOE : out std_logic;
+				FlashWE : out std_logic;
+				FlashRP : out std_logic;
+				FlashAddr : out std_logic_vector(22 downto 0);
+				FlashData : inout std_logic_vector(15 downto 0);
+
+				LEDOut : out std_logic_vector(15 downto 0));
 	end component;
 
 	signal CPUClock : STD_LOGIC;
@@ -115,7 +134,7 @@ architecture Behavioral of CPUTop is
 	signal ResetInv : STD_LOGIC;
 
 begin
-	
+
 	ResetInv <= not Reset;
 
 	CPUInstance : CPU port map (
@@ -134,28 +153,35 @@ begin
 		Clock => Clock,
 		Reset => ResetInv,
 		CPUClock => CPUClock,
-		InstAddress => InstAddress,
-		InstData => InstData,
-		MemWriteEN => MemWriteEN,
-		MemReadEN => MemReadEN,
-		DataAddress => DataAddress,
-		DataInput => CPUData,
-		DataOutput => RamData,
-		Ram1OE => Ram1OE,
-		Ram1WE => Ram1WE,
-		Ram1EN => Ram1EN,
-		Ram1Addr => Ram1Addr,
-		Ram1Data => Ram1Data,
-		SerialDataReady => SerialDataReady,
-		SerialRDN => SerialRDN,
+		ReadEN => MemReadEN,
+		WriteEN => MemWriteEN,
+		Address1 => InstAddress,
+		DataOutput1 => InstData,
+		Address2 => DataAddress,
+		DataInput2 => CPUData,
+		DataOutput2 => RamData,
+		MemoryAddress => Ram2Addr,
+		MemoryDataBus => Ram2Data,
+		MemoryEN => Ram2EN,
+		MemoryOE => Ram2OE,
+		MemoryWE => Ram2WE,
+		RAM1EN => Ram1EN,
 		SerialWRN => SerialWRN,
-		SerialTBRE => SerialTBRE,
+		SerialRDN => SerialRDN,
+		SerialDATA_READY => SerialDataReady,
 		SerialTSRE => SerialTSRE,
-		Ram2OE => Ram2OE,
-		Ram2WE => Ram2WE,
-		Ram2EN => Ram2EN,
-		Ram2Addr => Ram2Addr,
-		Ram2Data => Ram2Data
+		SerialTBRE => SerialTBRE,
+		SerialDataBus => Ram1Data(7 downto 0);
+
+		FlashByte => FlashByte,
+		FlashVpen => FlashVpen,
+		FlashCE => FlashCE,
+		FlashOE => FlashOE,
+		FlashWE => FlashWE,
+		FlashRP => FlashRP,
+		FlashAddr => FlashAddr,
+		FlashData => FlashData,
+		LEDOut => LEDOut
 	);
 
 end Behavioral;
