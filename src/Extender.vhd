@@ -42,6 +42,7 @@ architecture Behavioral of Extender is
 	signal last4 : STD_LOGIC_VECTOR(3 downto 0);
 	signal last5 : STD_LOGIC_VECTOR(4 downto 0);
 	signal last8 : STD_LOGIC_VECTOR(7 downto 0);
+	signal last11 : STD_LOGIC_VECTOR(10 downto 0);
 	signal from4to2 : STD_LOGIC_VECTOR(2 downto 0);
 
 	constant SIZE : INTEGER := 16;
@@ -54,6 +55,7 @@ begin
 	last4 <= Instruction(3 downto 0);
 	last5 <= Instruction(4 downto 0);
 	last8 <= Instruction(7 downto 0);
+	last11 <= Instruction(10 downto 0);
 	from4to2 <= Instruction(4 downto 2);
 
 	Extended <= SXT(last8, SIZE) when first5 = "01001" -- ADDIU
@@ -72,6 +74,7 @@ begin
 											 or first5 = "11011" else -- SW
 					EXT(from4to2, SIZE) when (first5 = "00110" and last2 = "00") -- SLL
 												 or (first5 = "00110" and last2 = "11") else -- SRA
+					SXT(last11, SIZE) when first5 = "00010" else -- B
 					(others => '0');
 
 end Behavioral;

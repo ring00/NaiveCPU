@@ -58,6 +58,7 @@ begin
 	FlashByte <= '1';
 	FlashVpen <= '1';
 	FlashRP <= '1';
+	FlashCE <= '0';
 
 	process(Clock, Reset)
 	begin

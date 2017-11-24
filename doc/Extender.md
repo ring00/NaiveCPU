@@ -17,3 +17,4 @@
 3. Instruction(3 downto 0) 符号扩展
 4. Instruction(4 downto 0) 符号扩展
 5. Instruction(4 downto 2) 无符号扩展
+6. Instruction(10 downto 0) 符号扩展

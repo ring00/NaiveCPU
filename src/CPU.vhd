@@ -493,7 +493,7 @@ begin
 		Sel => EXForwardA,
 		InputA => IDEXRegDataA,
 		InputB => EXMEMEXResult,
-		InputC => MEMWBEXResult,
+		InputC => WBMuxOutput,
 		Output => EXMux3AOutput
 	);
 
@@ -501,7 +501,7 @@ begin
 		Sel => EXForwardB,
 		InputA => IDEXRegDataB,
 		InputB => EXMEMEXResult,
-		INputC => MEMWBEXResult,
+		InputC => WBMuxOutput,
 		Output => EXMux3BOutput
 	);
 

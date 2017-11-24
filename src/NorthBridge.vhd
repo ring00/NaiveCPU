@@ -22,7 +22,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -113,7 +113,7 @@ architecture Behavioral of NorthBridge is
 
 begin
 
-	FlashAdapter_c : FlashAdapter port map (
+	FlashAdapterInstance : FlashAdapter port map (
 		Clock => Clock,
 		Reset => Reset,
 		Address => FlashAddrInput,
@@ -176,6 +176,7 @@ begin
 	begin
 		if Reset = '1' then
 			state <= BOOT_START;
+			--state <= BOOT_COMPLETE;
 		elsif rising_edge(Clock) then
 			case state is
 				when BOOT =>
@@ -189,19 +190,19 @@ begin
 					case FlashTimer is
 						when "00000000" =>
 							FlashAddrInput <= FlashBootAddr;
-							FlashTimer <= FlashTimer + 1;
+							FlashTimer <= STD_LOGIC_VECTOR(unsigned(FlashTimer) + 1);
 							state <= BOOT_FLASH;
 						when "11111111" =>
 							state <= BOOT_RAM;
 							FlashReadData <= FlashDataOutput;
 							FlashTimer <= "00000000";
 						when others =>
-							FlashTimer <= FlashTimer + 1;
+							FlashTimer <= STD_LOGIC_VECTOR(unsigned(FlashTimer) + 1);
 							state <= BOOT_FLASH;
 					end case;
 				when BOOT_RAM =>
-					FlashBootAddr <= FlashBootAddr + 2;
-					FlashBootMemAddr <= FlashBootMemAddr + 1;
+					FlashBootAddr <= STD_LOGIC_VECTOR(unsigned(FlashBootAddr) + 2);
+					FlashBootMemAddr <= STD_LOGIC_VECTOR(unsigned(FlashBootMemAddr) + 1);
 					if FlashBootMemAddr < x"0FFF" then
 						state <= BOOT_FLASH;
 					else

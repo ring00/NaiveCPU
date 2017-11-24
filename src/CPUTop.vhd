@@ -30,7 +30,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity CPUTop is
-	Port (Clock : in  STD_LOGIC;
+	Port (Clock50 : in  STD_LOGIC;
+			Clock11 : in STD_LOGIC;
+			Clock00 : in STD_LOGIC;
 			Reset : in STD_LOGIC;
 
 			Ram1OE : out STD_LOGIC;
@@ -49,7 +51,7 @@ entity CPUTop is
 			SerialRDN : out STD_LOGIC;
 			SerialWRN : out STD_LOGIC;
 			SerialTBRE : in STD_LOGIC;
-			SerialTSRE : in STD_LOGIC
+			SerialTSRE : in STD_LOGIC;
 
 			FlashByte : out std_logic;
 			FlashVpen : out std_logic;
@@ -58,13 +60,13 @@ entity CPUTop is
 			FlashWE : out std_logic;
 			FlashRP : out std_logic;
 			FlashAddr : out std_logic_vector(22 downto 0);
-			FlashData : inout std_logic_vector(15 downto 0)
+			FlashData : inout std_logic_vector(15 downto 0);
 
 			LED : out std_logic_vector (15 downto 0));
 end CPUTop;
 
 architecture Behavioral of CPUTop is
-
+	
 	component CPU is
 		Port (Clock : in STD_LOGIC;
 				Reset : in STD_LOGIC;
@@ -149,8 +151,11 @@ begin
 		MemWriteEN => MemWriteEN
 	);
 
+	LED(12 downto 0) <= InstAddress(12 downto 0);
+	LED(15 downto 13) <= SerialDataReady & SerialTBRE & SerialTSRE;
+
 	NorthBridgeInstance : NorthBridge port map (
-		Clock => Clock,
+		Clock => Clock11,
 		Reset => ResetInv,
 		CPUClock => CPUClock,
 		ReadEN => MemReadEN,
@@ -171,7 +176,7 @@ begin
 		SerialDATA_READY => SerialDataReady,
 		SerialTSRE => SerialTSRE,
 		SerialTBRE => SerialTBRE,
-		SerialDataBus => Ram1Data(7 downto 0);
+		SerialDataBus => Ram1Data(7 downto 0),
 
 		FlashByte => FlashByte,
 		FlashVpen => FlashVpen,
@@ -180,8 +185,13 @@ begin
 		FlashWE => FlashWE,
 		FlashRP => FlashRP,
 		FlashAddr => FlashAddr,
-		FlashData => FlashData,
-		LEDOut => LEDOut
+		FlashData => FlashData
+		--LEDOut => LED
 	);
+
+	Ram1Data(15 downto 8) <= (others => 'Z');
+	Ram1Addr <= (others => 'Z');
+	Ram1OE <= '1';
+	Ram1WE <= '1';
 
 end Behavioral;
