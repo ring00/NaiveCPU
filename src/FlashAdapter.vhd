@@ -31,28 +31,28 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity FlashAdapter is
 	port (
-		Clock : in std_logic;
-		Reset : in std_logic;
-		Address : in std_logic_vector(22 downto 0);
-		OutputData : out std_logic_vector(15 downto 0);
-		ctl_read : in std_logic;
+		Clock : in STD_LOGIC;
+		Reset : in STD_LOGIC;
+		Address : in STD_LOGIC_VECTOR(22 downto 0);
+		OutputData : out STD_LOGIC_VECTOR(15 downto 0);
+		ctl_read : in STD_LOGIC;
 
-		FlashByte : out std_logic;
-		FlashVpen : out std_logic;
-		FlashCE : out std_logic;
-		FlashOE : out std_logic;
-		FlashWE : out std_logic;
-		FlashRP : out std_logic;
+		FlashByte : out STD_LOGIC;
+		FlashVpen : out STD_LOGIC;
+		FlashCE : out STD_LOGIC;
+		FlashOE : out STD_LOGIC;
+		FlashWE : out STD_LOGIC;
+		FlashRP : out STD_LOGIC;
 
-		FlashAddr : out std_logic_vector(22 downto 0);
-		FlashData : inout std_logic_vector(15 downto 0)
+		FlashAddr : out STD_LOGIC_VECTOR(22 downto 0);
+		FlashData : inout STD_LOGIC_VECTOR(15 downto 0)
 	);
 end FlashAdapter;
 
 architecture Behavioral of FlashAdapter is
 	type STATE_TYPE is (INIT, READ1, READ2, READ3, READ4);
 	signal state : STATE_TYPE;
-	signal ctl_read_last : std_logic;
+	signal ctl_read_last : STD_LOGIC;
 begin
 
 	FlashByte <= '1';

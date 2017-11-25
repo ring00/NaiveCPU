@@ -32,9 +32,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity CPUTop is
 	Port (Clock50 : in  STD_LOGIC;
 			Clock11 : in STD_LOGIC;
-			Clock00 : in STD_LOGIC;
-			Reset : in STD_LOGIC;
-			
+			Click : in STD_LOGIC;
+			ResetInv : in STD_LOGIC;
+
 			SW : in STD_LOGIC_VECTOR(15 downto 0);
 
 			Ram1OE : out STD_LOGIC;
@@ -55,16 +55,16 @@ entity CPUTop is
 			SerialTBRE : in STD_LOGIC;
 			SerialTSRE : in STD_LOGIC;
 
-			FlashByte : out std_logic;
-			FlashVpen : out std_logic;
-			FlashCE : out std_logic;
-			FlashOE : out std_logic;
-			FlashWE : out std_logic;
-			FlashRP : out std_logic;
-			FlashAddr : out std_logic_vector(22 downto 0);
-			FlashData : inout std_logic_vector(15 downto 0);
+			FlashByte : out STD_LOGIC;
+			FlashVpen : out STD_LOGIC;
+			FlashCE : out STD_LOGIC;
+			FlashOE : out STD_LOGIC;
+			FlashWE : out STD_LOGIC;
+			FlashRP : out STD_LOGIC;
+			FlashAddr : out STD_LOGIC_VECTOR(22 downto 0);
+			FlashData : inout STD_LOGIC_VECTOR(15 downto 0);
 
-			LED : out std_logic_vector (15 downto 0);
+			LED : out STD_LOGIC_VECTOR(15 downto 0);
 
 			DYP0 : out STD_LOGIC_VECTOR(6 downto 0);
 			DYP1 : out STD_LOGIC_VECTOR(6 downto 0));
@@ -89,7 +89,7 @@ architecture Behavioral of CPUTop is
 
 	signal InstAddress : STD_LOGIC_VECTOR(15 downto 0);
 	signal DataAddress : STD_LOGIC_VECTOR(15 downto 0);
-	signal CPUData : STD_LOGIC_VECTOR(15 downto 0);
+	signal CPUDataOutput : STD_LOGIC_VECTOR(15 downto 0);
 	signal MemReadEN : STD_LOGIC;
 	signal MemWriteEN : STD_LOGIC;
 
@@ -136,66 +136,61 @@ architecture Behavioral of CPUTop is
 	signal CPUClock : STD_LOGIC;
 	signal InstData : STD_LOGIC_VECTOR(15 downto 0);
 	signal RamData : STD_LOGIC_VECTOR(15 downto 0);
-	signal ResetInv : STD_LOGIC;
-
-	component FrequencyDivider is
-		Port (Reset : in STD_LOGIC;
-				Clock11 : in  STD_LOGIC;
-				Clock01 : out  STD_LOGIC);
-	end component;
-
-	signal Clock01 : STD_LOGIC;
+	signal Reset : STD_LOGIC;
 
 	component Seg7 is
 	port(
-		key : in std_logic_vector(3 downto 0);
-		display : out std_logic_vector(6 downto 0)
+		Number : in STD_LOGIC_VECTOR(3 downto 0);
+		Dispaly : out STD_LOGIC_VECTOR(6 downto 0)
 	);
 	end component;
 
-	signal key0, key1 : STD_LOGIC_VECTOR(3 downto 0);
+	signal Number0 : STD_LOGIC_VECTOR(3 downto 0);
+	signal Number1 : STD_LOGIC_VECTOR(3 downto 0);
 	
 	signal Clock : STD_LOGIC;
 
 begin
 
-	Seg0 : Seg7 port map(key0, DYP0);
-	Seg1 : Seg7 port map(key1, DYP1);
-	key1 <= InstAddress(3 downto 0);
-	key0 <= InstAddress(7 downto 4);
-
-	FrequencyDividerInstance : FrequencyDivider port map (
-		Reset => ResetInv,
-		Clock11 => Clock11,
-		Clock01 => Clock01
+	Seg0 : Seg7 port map (
+		Number0, DYP0
 	);
 
-	ResetInv <= not Reset;
+	Number0 <= InstAddress(7 downto 4);
+
+	Seg1 : Seg7 port map(
+		Number1, DYP1
+	);
+
+	Number1 <= InstAddress(3 downto 0);
+
+	LED <= InstData;
+
+	Clock <= Clock50;
+	Reset <= not ResetInv;
 
 	CPUInstance : CPU port map (
 		Clock => CPUClock,
-		Reset => ResetInv,
+		Reset => Reset,
 		InstAddress => InstAddress,
 		InstData => InstData,
 		DataAddress => DataAddress,
 		DataInput => RamData,
-		DataOutput => CPUData,
+		DataOutput => CPUDataOutput,
 		MemReadEN => MemReadEN,
 		MemWriteEN => MemWriteEN
 	);
 
-	LED <= InstData;
-
 	NorthBridgeInstance : NorthBridge port map (
-		Clock => Clock11,
-		Reset => ResetInv,
+		Clock => Clock,
+		Reset => Reset,
 		CPUClock => CPUClock,
 		ReadEN => MemReadEN,
 		WriteEN => MemWriteEN,
 		Address1 => InstAddress,
 		DataOutput1 => InstData,
 		Address2 => DataAddress,
-		DataInput2 => CPUData,
+		DataInput2 => CPUDataOutput,
 		DataOutput2 => RamData,
 		MemoryAddress => Ram2Addr,
 		MemoryDataBus => Ram2Data,
