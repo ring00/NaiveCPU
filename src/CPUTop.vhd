@@ -34,6 +34,8 @@ entity CPUTop is
 			Clock11 : in STD_LOGIC;
 			Clock00 : in STD_LOGIC;
 			Reset : in STD_LOGIC;
+			
+			SW : in STD_LOGIC_VECTOR(15 downto 0);
 
 			Ram1OE : out STD_LOGIC;
 			Ram1WE : out STD_LOGIC;
@@ -62,11 +64,14 @@ entity CPUTop is
 			FlashAddr : out std_logic_vector(22 downto 0);
 			FlashData : inout std_logic_vector(15 downto 0);
 
-			LED : out std_logic_vector (15 downto 0));
+			LED : out std_logic_vector (15 downto 0);
+
+			DYP0 : out STD_LOGIC_VECTOR(6 downto 0);
+			DYP1 : out STD_LOGIC_VECTOR(6 downto 0));
 end CPUTop;
 
 architecture Behavioral of CPUTop is
-	
+
 	component CPU is
 		Port (Clock : in STD_LOGIC;
 				Reset : in STD_LOGIC;
@@ -125,9 +130,7 @@ architecture Behavioral of CPUTop is
 				FlashWE : out std_logic;
 				FlashRP : out std_logic;
 				FlashAddr : out std_logic_vector(22 downto 0);
-				FlashData : inout std_logic_vector(15 downto 0);
-
-				LEDOut : out std_logic_vector(15 downto 0));
+				FlashData : inout std_logic_vector(15 downto 0));
 	end component;
 
 	signal CPUClock : STD_LOGIC;
@@ -135,7 +138,37 @@ architecture Behavioral of CPUTop is
 	signal RamData : STD_LOGIC_VECTOR(15 downto 0);
 	signal ResetInv : STD_LOGIC;
 
+	component FrequencyDivider is
+		Port (Reset : in STD_LOGIC;
+				Clock11 : in  STD_LOGIC;
+				Clock01 : out  STD_LOGIC);
+	end component;
+
+	signal Clock01 : STD_LOGIC;
+
+	component Seg7 is
+	port(
+		key : in std_logic_vector(3 downto 0);
+		display : out std_logic_vector(6 downto 0)
+	);
+	end component;
+
+	signal key0, key1 : STD_LOGIC_VECTOR(3 downto 0);
+	
+	signal Clock : STD_LOGIC;
+
 begin
+
+	Seg0 : Seg7 port map(key0, DYP0);
+	Seg1 : Seg7 port map(key1, DYP1);
+	key1 <= InstAddress(3 downto 0);
+	key0 <= InstAddress(7 downto 4);
+
+	FrequencyDividerInstance : FrequencyDivider port map (
+		Reset => ResetInv,
+		Clock11 => Clock11,
+		Clock01 => Clock01
+	);
 
 	ResetInv <= not Reset;
 
@@ -151,8 +184,7 @@ begin
 		MemWriteEN => MemWriteEN
 	);
 
-	LED(12 downto 0) <= InstAddress(12 downto 0);
-	LED(15 downto 13) <= SerialDataReady & SerialTBRE & SerialTSRE;
+	LED <= InstData;
 
 	NorthBridgeInstance : NorthBridge port map (
 		Clock => Clock11,
@@ -186,11 +218,10 @@ begin
 		FlashRP => FlashRP,
 		FlashAddr => FlashAddr,
 		FlashData => FlashData
-		--LEDOut => LED
 	);
 
-	Ram1Data(15 downto 8) <= (others => 'Z');
-	Ram1Addr <= (others => 'Z');
+	Ram1Data(15 downto 8) <= (others => '0');
+	Ram1Addr <= (others => '0');
 	Ram1OE <= '1';
 	Ram1WE <= '1';
 

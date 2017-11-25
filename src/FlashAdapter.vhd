@@ -68,7 +68,7 @@ begin
 			FlashOE <= '1';
 			FlashData <= (others => 'Z');
 			ctl_read_last <= ctl_read;
-		elsif rising_edge(Clock) then
+		elsif RISING_EDGE(Clock) then
 			case state is
 				when INIT =>
 					if ctl_read_last /= ctl_read then

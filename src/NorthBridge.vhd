@@ -66,9 +66,7 @@ entity NorthBridge is
 			FlashWE : out std_logic;
 			FlashRP : out std_logic;
 			FlashAddr : out std_logic_vector(22 downto 0);
-			FlashData : inout std_logic_vector(15 downto 0);
-
-			LEDOut : out std_logic_vector(15 downto 0));
+			FlashData : inout std_logic_vector(15 downto 0));
 end NorthBridge;
 
 architecture Behavioral of NorthBridge is
@@ -93,7 +91,7 @@ architecture Behavioral of NorthBridge is
 	end component;
 
 	type STATE_TYPE is (BOOT, BOOT_START, BOOT_FLASH, BOOT_RAM, BOOT_COMPLETE, DATA_PRE, DATA_RW, INS_READ);
-	signal state : STATE_TYPE;
+	signal state : STATE_TYPE := BOOT_COMPLETE;
 
 	signal BufferData1, BufferData2 : std_logic_vector(15 downto 0);
 	signal BF01 : std_logic_vector(15 downto 0);
@@ -130,8 +128,6 @@ begin
 		FlashAddr => FlashAddr,
 		FlashData => FlashData
 	);
-
-	LEDOut <= FlashBootMemAddr;
 
 	MemoryEN <= '0';
 	RAM1EN <= '1';
@@ -175,8 +171,8 @@ begin
 	process (Clock, Reset)
 	begin
 		if Reset = '1' then
-			state <= BOOT_START;
-			--state <= BOOT_COMPLETE;
+			--state <= BOOT_START;
+			state <= BOOT_COMPLETE;
 		elsif rising_edge(Clock) then
 			case state is
 				when BOOT =>

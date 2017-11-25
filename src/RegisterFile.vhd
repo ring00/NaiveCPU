@@ -53,12 +53,12 @@ begin
 	with ReadRegA select RegDataA <=
 		(others => '0') when "0000",
 		PCInput when "0001",
-		Registers(to_integer(unsigned(ReadRegA))) when others;
+		Registers(TO_INTEGER(UNSIGNED(ReadRegA))) when others;
 
 	with ReadRegB select RegDataB <=
 		(others => '0') when "0000",
 		PCInput when "0001",
-		Registers(to_integer(unsigned(ReadRegA))) when others;
+		Registers(TO_INTEGER(UNSIGNED(ReadRegB))) when others;
 
 	Update : process (Reset, Clock)
 	begin
@@ -68,7 +68,7 @@ begin
 			if (Clear = '1') then
 				Registers <= (others => (others => '0'));
 			elsif (WriteEN = '1') then
-				Registers(to_integer(unsigned(WriteReg))) <= WriteData;
+				Registers(TO_INTEGER(UNSIGNED(WriteReg))) <= WriteData;
 			end if;
 		end if;
 	end process Update;

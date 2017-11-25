@@ -70,6 +70,7 @@ begin
 							or first8 = "01100011" -- ADDSP
 							or (first5 = "11100" and last2 = "01") -- ADDU
 							or (first5 = "11101" and last5 = "01100") -- AND
+							or (first5 = "11101" and last5 = "01010") -- CMP
 							or first5 = "01101" -- LI
 							or first5 = "10011" -- LW
 							or first5 = "10010" -- LW_SP
