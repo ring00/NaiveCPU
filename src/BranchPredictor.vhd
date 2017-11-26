@@ -78,10 +78,10 @@ begin
 		Output => PredictedAddress
 	);
 
-	with state select TargetAddress <=
-		PredictedAddress when PREDICT,
-		ActualAddress when AMEND,
-		(others => '0') when others;
+	--with state select TargetAddress <=
+	--	PredictedAddress when PREDICT,
+	--	ActualAddress when AMEND,
+	--	(others => '0') when others;
 
 	Counter <= HisotryBuffer(TO_INTEGER(UNSIGNED(PCInput(7 downto 0))));
 
@@ -114,6 +114,7 @@ begin
 			elsif (WriteEN = '1') then
 				case (state) is
 					when PREDICT =>
+						TargetAddress <= PredictedAddress;
 						Index <= PCInput(7 downto 0);
 						CurrentCounter <= Counter;
 						if (BranchType = "000") then
@@ -129,6 +130,7 @@ begin
 							when others => CurrentPrediction <= '0'; -- Normal Instructions
 						end case;
 					when AMEND =>
+						TargetAddress <= ActualAddress;
 						state <= PREDICT;
 						if (CurrentPrediction = ActualBranch) then
 							CurrentPrediction <= '0';

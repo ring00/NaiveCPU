@@ -166,7 +166,7 @@ begin
 
 	LED <= InstData;
 
-	Clock <= Clock50;
+	Clock <= Click;
 	Reset <= not ResetInv;
 
 	CPUInstance : CPU port map (

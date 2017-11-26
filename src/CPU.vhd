@@ -168,6 +168,25 @@ architecture Behavioral of CPU is
 
 	signal IDDataHazard : STD_LOGIC;
 
+	component BranchPredictor is
+		Port (Clock : in  STD_LOGIC;
+				Reset : in  STD_LOGIC;
+				Clear : in STD_LOGIC;
+				WriteEN : in STD_LOGIC;
+				BranchType : in STD_LOGIC_VECTOR(2 downto 0);
+				PCInput : in STD_LOGIC_VECTOR(15 downto 0);
+				Offset : in STD_LOGIC_VECTOR(15 downto 0);
+				ActualBranch : in STD_LOGIC;
+				ActualAddress : in STD_LOGIC_VECTOR(15 downto 0);
+				Branch : out STD_LOGIC;
+				TargetAddress : out STD_LOGIC_VECTOR(15 downto 0);
+				Misprediction : out STD_LOGIC);
+	end component;
+
+	signal IDBranch : STD_LOGIC;
+	signal IDTargetAddress : STD_LOGIC_VECTOR(15 downto 0);
+	signal IDMisprediction : STD_LOGIC;
+
 -- ID END --
 
 	component IDEX is
@@ -372,15 +391,15 @@ begin
 	);
 
 	IFMuxInstance : Mux port map (
-		Sel => EXBranch,
+		Sel => IDMisprediction,
 		InputA => IFAdderOutput,
-		InputB => EXAddress,
+		InputB => IDTargetAddress,
 		Output => IFMuxOutput
 	);
 
 	StallUnitInstance : StallUnit port map (
 		DataHazard => IDDataHazard,
-		Misprediction => EXBranch,
+		Misprediction => IDMisprediction,
 		PCWriteEN => PCWriteEN,
 		IFIDWriteEN => IFIDWriteEN,
 		IDEXWriteEN => IDEXWriteEN,
@@ -450,6 +469,21 @@ begin
 		RegSrcA => IDRegSrcA,
 		RegSrcB => IDRegSrcB,
 		DataHazard => IDDataHazard
+	);
+
+	BranchPredictorInstance : BranchPredictor port map (
+		Clock => Clock,
+		Reset => Reset,
+		Clear => '0',
+		WriteEN => IFIDWriteEN,
+		BranchType => IDBranchType,
+		PCInput => IFIDPC,
+		Offset => IDExtended,
+		ActualBranch => EXBranch,
+		ActualAddress => EXAddress,
+		Branch => IDBranch,
+		TargetAddress => IDTargetAddress,
+		Misprediction => IDMisprediction
 	);
 
 -- ID END
