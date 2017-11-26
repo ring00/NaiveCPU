@@ -166,7 +166,7 @@ begin
 
 	LED <= InstData;
 
-	Clock <= Click;
+	Clock <= Clock11;
 	Reset <= not ResetInv;
 
 	CPUInstance : CPU port map (
@@ -182,7 +182,7 @@ begin
 	);
 
 	NorthBridgeInstance : NorthBridge port map (
-		Clock => Clock,
+		Clock => Clock50,
 		Reset => Reset,
 		CPUClock => CPUClock,
 		ReadEN => MemReadEN,

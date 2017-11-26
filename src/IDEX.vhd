@@ -36,6 +36,7 @@ entity IDEX is
 			WriteEN : in STD_LOGIC;
 
 			PCInput : in STD_LOGIC_VECTOR(15 downto 0);
+			BranchInput : in STD_LOGIC_VECTOR(15 downto 0);
 			RegWriteInput : in STD_LOGIC;
 			MemReadInput : in STD_LOGIC;
 			MemWriteInput : in STD_LOGIC;
@@ -50,6 +51,7 @@ entity IDEX is
 			RegDataBInput : in STD_LOGIC_VECTOR(15 downto 0);
 
 			PCOutput : out STD_LOGIC_VECTOR(15 downto 0);
+			BranchOutput : out STD_LOGIC_VECTOR(15 downto 0);
 			RegWriteOutput : out STD_LOGIC;
 			MemReadOutput : out STD_LOGIC;
 			MemWriteOutput : out STD_LOGIC;
@@ -67,6 +69,7 @@ end IDEX;
 architecture Behavioral of IDEX is
 
 	signal PC : STD_LOGIC_VECTOR(15 downto 0);
+	signal Branch : STD_LOGIC_VECTOR(15 downto 0);
 	signal RegWrite : STD_LOGIC;
 	signal MemRead : STD_LOGIC;
 	signal MemWrite : STD_LOGIC;
@@ -83,6 +86,7 @@ architecture Behavioral of IDEX is
 begin
 
 	PCOutput <= PC;
+	BranchOutput <= Branch;
 	RegWriteOutput <= RegWrite;
 	MemReadOutput <= MemRead;
 	MemWriteOutput <= MemWrite;
@@ -100,6 +104,7 @@ begin
 	begin
 		if (Reset = '1') then
 			PC <= (others => '0');
+			Branch <= (others => '0');
 			RegWrite <= '0';
 			MemRead <= '0';
 			MemWrite <= '0';
@@ -115,6 +120,7 @@ begin
 		elsif (RISING_EDGE(Clock)) then
 			if (Clear = '1') then
 				PC <= (others => '0');
+				Branch <= (others => '0');
 				RegWrite <= '0';
 				MemRead <= '0';
 				MemWrite <= '0';
@@ -129,6 +135,7 @@ begin
 				RegDataB <= (others => '0');
 			elsif (WriteEN = '1') then
 				PC <= PCInput;
+				Branch <= BranchInput;
 				RegWrite <= RegWriteInput;
 				MemRead <= MemReadInput;
 				MemWrite <= MemWriteInput;

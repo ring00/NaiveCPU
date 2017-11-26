@@ -175,16 +175,12 @@ architecture Behavioral of CPU is
 				WriteEN : in STD_LOGIC;
 				BranchType : in STD_LOGIC_VECTOR(2 downto 0);
 				PCInput : in STD_LOGIC_VECTOR(15 downto 0);
-				Offset : in STD_LOGIC_VECTOR(15 downto 0);
-				ActualBranch : in STD_LOGIC;
-				ActualAddress : in STD_LOGIC_VECTOR(15 downto 0);
-				Branch : out STD_LOGIC;
-				TargetAddress : out STD_LOGIC_VECTOR(15 downto 0);
+				BranchTaken : in STD_LOGIC;
+				BranchSelect : out STD_LOGIC_VECTOR(1 downto 0);
 				Misprediction : out STD_LOGIC);
 	end component;
 
-	signal IDBranch : STD_LOGIC;
-	signal IDTargetAddress : STD_LOGIC_VECTOR(15 downto 0);
+	signal IDBranchSelect : STD_LOGIC_VECTOR(1 downto 0);
 	signal IDMisprediction : STD_LOGIC;
 
 -- ID END --
@@ -196,6 +192,7 @@ architecture Behavioral of CPU is
 				WriteEN : in STD_LOGIC;
 
 				PCInput : in STD_LOGIC_VECTOR(15 downto 0);
+				BranchInput : in STD_LOGIC_VECTOR(15 downto 0);
 				RegWriteInput : in STD_LOGIC;
 				MemReadInput : in STD_LOGIC;
 				MemWriteInput : in STD_LOGIC;
@@ -210,6 +207,7 @@ architecture Behavioral of CPU is
 				RegDataBInput : in STD_LOGIC_VECTOR(15 downto 0);
 
 				PCOutput : out STD_LOGIC_VECTOR(15 downto 0);
+				BranchOutput : out STD_LOGIC_VECTOR(15 downto 0);
 				RegWriteOutput : out STD_LOGIC;
 				MemReadOutput : out STD_LOGIC;
 				MemWriteOutput : out STD_LOGIC;
@@ -225,6 +223,7 @@ architecture Behavioral of CPU is
 	end component;
 
 	signal IDEXPC : STD_LOGIC_VECTOR(15 downto 0);
+	signal IDEXBranch : STD_LOGIC_VECTOR(15 downto 0);
 	signal IDEXRegWrite : STD_LOGIC;
 	signal IDEXMemRead : STD_LOGIC;
 	signal IDEXMemWrite : STD_LOGIC;
@@ -242,13 +241,14 @@ architecture Behavioral of CPU is
 
 	component BranchSelector is
 		Port (BranchType : in STD_LOGIC_VECTOR(2 downto 0);
+				PCInput : in STD_LOGIC_VECTOR(15 downto 0);
 				BranchInput : in STD_LOGIC_VECTOR(15 downto 0);
 				RegisterInput : in STD_LOGIC_VECTOR(15 downto 0);
-				Branch : out STD_LOGIC;
+				BranchTaken : out STD_LOGIC;
 				Address : out STD_LOGIC_VECTOR(15 downto 0));
 	end component;
 
-	signal EXBranch : STD_LOGIC;
+	signal EXBranchTaken : STD_LOGIC;
 	signal EXAddress : STD_LOGIC_VECTOR(15 downto 0);
 
 	component ALU is
@@ -344,7 +344,7 @@ architecture Behavioral of CPU is
 	end component;
 
 	signal IFAdderOutput : STD_LOGIC_VECTOR(15 downto 0);
-	signal EXAdderOutput : STD_LOGIC_VECTOR(15 downto 0);
+	signal IDAdderOutput : STD_LOGIC_VECTOR(15 downto 0);
 
 	component Mux is
 		Port (Sel : in STD_LOGIC;
@@ -353,7 +353,6 @@ architecture Behavioral of CPU is
 				Output : out STD_LOGIC_VECTOR(15 downto 0));
 	end component;
 
-	signal IFMuxOutput : STD_LOGIC_VECTOR(15 downto 0);
 	signal EXMuxOutput : STD_LOGIC_VECTOR(15 downto 0);
 	signal WBMuxOutput : STD_LOGIC_VECTOR(15 downto 0);
 
@@ -365,6 +364,7 @@ architecture Behavioral of CPU is
 				Output : out STD_LOGIC_VECTOR(15 downto 0));
 	end component;
 
+	signal IFMux3Output : STD_LOGIC_VECTOR(15 downto 0);
 	signal EXMux3AOutput : STD_LOGIC_VECTOR(15 downto 0);
 	signal EXMux3BOutput : STD_LOGIC_VECTOR(15 downto 0);
 
@@ -378,7 +378,7 @@ begin
 		Reset => Reset,
 		Clear => PCClear,
 		WriteEN => PCWriteEN,
-		PCInput => IFMuxOutput,
+		PCInput => IFMux3Output,
 		PCOutput => IFPC
 	);
 
@@ -390,11 +390,12 @@ begin
 		Output => IFAdderOutput
 	);
 
-	IFMuxInstance : Mux port map (
-		Sel => IDMisprediction,
+	IFMux3Instance : Mux3 port map (
+		Sel => IDBranchSelect,
 		InputA => IFAdderOutput,
-		InputB => IDTargetAddress,
-		Output => IFMuxOutput
+		InputB => IDAdderOutput,
+		InputC => EXAddress,
+		Output => IFMux3Output
 	);
 
 	StallUnitInstance : StallUnit port map (
@@ -471,6 +472,12 @@ begin
 		DataHazard => IDDataHazard
 	);
 
+	IDAddInstance : Adder port map (
+		InputA => IFIDPC,
+		InputB => IDExtended,
+		Output => IDAdderOutput
+	);
+
 	BranchPredictorInstance : BranchPredictor port map (
 		Clock => Clock,
 		Reset => Reset,
@@ -478,11 +485,8 @@ begin
 		WriteEN => IFIDWriteEN,
 		BranchType => IDBranchType,
 		PCInput => IFIDPC,
-		Offset => IDExtended,
-		ActualBranch => EXBranch,
-		ActualAddress => EXAddress,
-		Branch => IDBranch,
-		TargetAddress => IDTargetAddress,
+		BranchTaken => EXBranchTaken,
+		BranchSelect => IDBranchSelect,
 		Misprediction => IDMisprediction
 	);
 
@@ -494,6 +498,7 @@ begin
 		Clear => IDEXClear,
 		WriteEN => IDEXWriteEN,
 		PCInput => IFIDPC,
+		BranchInput => IDAdderOutput,
 		RegWriteInput => IDRegWrite,
 		MemReadInput => IDMemRead,
 		MemWriteInput => IDMemWrite,
@@ -507,6 +512,7 @@ begin
 		RegDataAInput => IDRegDataA,
 		RegDataBInput => IDRegDataB,
 		PCOutput => IDEXPC,
+		BranchOutput => IDEXBranch,
 		RegWriteOutput => IDEXRegWrite,
 		MemReadOutput => IDEXMemRead,
 		MemWriteOutput => IDEXMemWrite,
@@ -553,17 +559,12 @@ begin
 		Output => ALUOutput
 	);
 
-	EXAdderInstance : Adder port map (
-		InputA => IDEXPC,
-		InputB => IDEXExtended,
-		Output => EXAdderOutput
-	);
-
 	BranchSelectorInstance : BranchSelector port map (
 		BranchType => IDEXBranchType,
-		BranchInput => EXAdderOutput,
+		PCInput => IDEXPC,
+		BranchInput => IDEXBranch,
 		RegisterInput => EXMux3AOutput,
-		Branch => EXBranch,
+		BranchTaken => EXBranchTaken,
 		Address => EXAddress
 	);
 

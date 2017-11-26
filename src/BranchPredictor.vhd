@@ -22,7 +22,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL;
+--use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -36,141 +36,112 @@ entity BranchPredictor is
 			WriteEN : in STD_LOGIC;
 			BranchType : in STD_LOGIC_VECTOR(2 downto 0);
 			PCInput : in STD_LOGIC_VECTOR(15 downto 0);
-			Offset : in STD_LOGIC_VECTOR(15 downto 0);
-			ActualBranch : in STD_LOGIC;
-			ActualAddress : in STD_LOGIC_VECTOR(15 downto 0);
-			Branch : out STD_LOGIC;
-			TargetAddress : out STD_LOGIC_VECTOR(15 downto 0);
+			BranchTaken : in STD_LOGIC;
+			BranchSelect : out STD_LOGIC_VECTOR(1 downto 0);
 			Misprediction : out STD_LOGIC);
 end BranchPredictor;
 
 architecture Behavioral of BranchPredictor is
 
-	component Adder is
-		Port (InputA : in  STD_LOGIC_VECTOR(15 downto 0);
-				InputB : in  STD_LOGIC_VECTOR(15 downto 0);
-				Output : out  STD_LOGIC_VECTOR(15 downto 0));
+	component RAM is
+		port (
+			a : in STD_LOGIC_VECTOR(7 downto 0);
+			d : in STD_LOGIC_VECTOR(1 downto 0);
+			clk : in STD_LOGIC;
+			we : in STD_LOGIC;
+			spo : out STD_LOGIC_VECTOR(1 downto 0)
+		);
 	end component;
 
-	type StateType is (PREDICT, AMEND);
-	signal state : StateType;
+	constant StronglyTaken : STD_LOGIC_VECTOR(1 downto 0) := "01";
+	constant WeaklyTaken : STD_LOGIC_VECTOR(1 downto 0) := "00";
+	constant WeaklyNotTaken : STD_LOGIC_VECTOR(1 downto 0) := "10";
+	constant StronglyNotTaken : STD_LOGIC_VECTOR(1 downto 0) := "11";
 
-	type SaturatingCounter is (StronglyNotTaken, WeaklyNotTaken, WeaklyTaken, StronglyTaken);
-	type BufferArray is array(0 to 255) of SaturatingCounter;
-	signal HisotryBuffer : BufferArray;
-
-	signal Index : STD_LOGIC_VECTOR(7 downto 0);
+	signal BufferAddress : STD_LOGIC_VECTOR(7 downto 0);
+	signal BufferData : STD_LOGIC_VECTOR(1 downto 0);
+	signal BufferWE : STD_LOGIC;
+	signal BufferState : STD_LOGIC_VECTOR(1 downto 0);
 
 	signal Prediction : STD_LOGIC;
-	signal Counter : SaturatingCounter;
+	signal LastPrediction : STD_LOGIC;
+	signal LastPC : STD_LOGIC_VECTOR(15 downto 0);
 
-	signal CurrentIndex : integer range 0 to 255;
-	signal CurrentPrediction : STD_LOGIC;
-	signal CurrentCounter : SaturatingCounter;
-
-	signal PredictedAddress : STD_LOGIC_VECTOR(15 downto 0);
+	type STATE_TYPE is (FORCAST, AMEND);
+	signal State : STATE_TYPE;
 
 begin
 
-	AdderInstance : Adder port map (
-		InputA => PCInput,
-		InputB => Offset,
-		Output => PredictedAddress
+	BufferAddress <= PCInput(7 downto 0) when State = FORCAST else
+						  LastPC(7 downto 0) when State = AMEND else
+						  (others => '0');
+
+	BufferData <= StronglyTaken when (State = AMEND and BufferState = StronglyTaken and BranchTaken = '1') else
+					  WeaklyTaken when (State = AMEND and BufferState = StronglyTaken and BranchTaken = '0') else
+					  StronglyTaken when (State = AMEND and BufferState = WeaklyTaken and BranchTaken = '1') else
+					  WeaklyNotTaken when (State = AMEND and BufferState = WeaklyTaken and BranchTaken = '0') else
+					  WeaklyTaken when (State = AMEND and BufferState = WeaklyNotTaken and BranchTaken = '1') else
+					  StronglyNotTaken when (State = AMEND and BufferState = WeaklyNotTaken and BranchTaken = '0') else
+					  WeaklyNotTaken when (State = AMEND and BufferState = StronglyNotTaken and BranchTaken = '1') else
+					  StronglyNotTaken when (State = AMEND and BufferState = StronglyNotTaken and BranchTaken = '0') else
+					  WeaklyTaken;
+
+	BufferWE <= '1' when (State = AMEND and BufferState = StronglyTaken and BranchTaken = '0')
+							or (State = AMEND and BufferState = WeaklyTaken and BranchTaken = '1')
+							or (State = AMEND and BufferState = WeaklyTaken and BranchTaken = '0')
+							or (State = AMEND and BufferState = WeaklyNotTaken and BranchTaken = '1')
+							or (State = AMEND and BufferState = WeaklyNotTaken and BranchTaken = '0')
+							or (State = AMEND and BufferState = StronglyNotTaken and BranchTaken = '1') else
+					'0';
+
+	BranchHistoryBuffer : RAM port map (
+		a => BufferAddress,
+		d => BufferData,
+		clk => Clock,
+		we => BufferWE,
+		spo => BufferState
 	);
 
-	--with state select TargetAddress <=
-	--	PredictedAddress when PREDICT,
-	--	ActualAddress when AMEND,
-	--	(others => '0') when others;
+	Prediction <= '1' when (State = FORCAST and BranchType = "001") -- B
+							  or (State = FORCAST and (BranchType = "011" or BranchType = "100") and (BufferState = WeaklyTaken or BufferState = StronglyTaken)) else -- BEQZ, BTEQZ, BNEZ, BTNEZ
+					  '0';
 
-	Counter <= HisotryBuffer(TO_INTEGER(UNSIGNED(PCInput(7 downto 0))));
+	BranchSelect <= "00" when (State = FORCAST and Prediction = '0')
+								  or (State = AMEND and LastPrediction = BranchTaken) else
+						 "01" when (State = FORCAST and Prediction = '1') else
+						 "10" when (State = AMEND and LastPrediction /= BranchTaken) else
+						 "00";
 
-	with Counter select Prediction <=
-		'0' when StronglyNotTaken,
-		'0' when WeaklyNotTaken,
-		'1' when WeaklyTaken,
-		'1' when StronglyTaken,
-		'1' when others;
-
-	Branch <= CurrentPrediction;
+	Misprediction <= '1' when (State = AMEND and LastPrediction /= BranchTaken) else
+						  '0';
 
 	Update : process(Clock, Reset)
 	begin
 		if (Reset = '1') then
-			state <= PREDICT;
-			HisotryBuffer <= (others => WeaklyTaken);
-			CurrentPrediction <= '0';
-			Misprediction <= '0';
-			Index <= (others => '0');
-			CurrentCounter <= WeaklyTaken;
-		elsif FALLING_EDGE(Clock) then -- TODO: Should I use FALLING_EDGE here just like RegisterFile?
+			State <= FORCAST;
+			LastPrediction <= '0';
+			LastPC <= (others => '0');
+		elsif RISING_EDGE(Clock) then
 			if (Clear = '1') then
-				state <= PREDICT;
-				HisotryBuffer <= (others => WeaklyTaken);
-				CurrentPrediction <= '0';
-				Misprediction <= '0';
-				Index <= (others => '0');
-				CurrentCounter <= WeaklyTaken;
+				State <= FORCAST;
+				LastPrediction <= '0';
+				LastPC <= (others => '0');
 			elsif (WriteEN = '1') then
-				case (state) is
-					when PREDICT =>
-						TargetAddress <= PredictedAddress;
-						Index <= PCInput(7 downto 0);
-						CurrentCounter <= Counter;
-						if (BranchType = "000") then
-							state <= PREDICT;
-						else
-							state <= AMEND;
-						end if;
-						case (BranchType) is
-							when "001" => CurrentPrediction <= '1'; -- B
-							when "010" => CurrentPrediction <= '0'; -- JR, DON'T JUMP!
-							when "011" => CurrentPrediction <= Prediction; -- BEQZ, BTEQZ
-							when "100" => CurrentPrediction <= Prediction; -- BNEZ, BTNEZ
-							when others => CurrentPrediction <= '0'; -- Normal Instructions
-						end case;
+				case(State) is
+					when FORCAST =>
+						case(BranchType) is
+							when "000" => State <= FORCAST;
+							when others => State <= AMEND;
+						end case ;
+						LastPrediction <= Prediction;
+						LastPC <= PCInput;
 					when AMEND =>
-						TargetAddress <= ActualAddress;
-						state <= PREDICT;
-						if (CurrentPrediction = ActualBranch) then
-							CurrentPrediction <= '0';
-							Misprediction <= '0';
-						else
-							CurrentPrediction <= '1';
-							Misprediction <= '1';
-						end if;
-						case (CurrentCounter) is
-							when StronglyNotTaken =>
-								if ActualBranch = '1' then
-									HisotryBuffer(TO_INTEGER(UNSIGNED(Index))) <= WeaklyNotTaken;
-								else
-									HisotryBuffer(TO_INTEGER(UNSIGNED(Index))) <= StronglyNotTaken;
-								end if;
-							when WeaklyNotTaken =>
-								if ActualBranch = '1' then
-									HisotryBuffer(TO_INTEGER(UNSIGNED(Index))) <= WeaklyTaken;
-								else
-									HisotryBuffer(TO_INTEGER(UNSIGNED(Index))) <= StronglyNotTaken;
-								end if;
-							when WeaklyTaken =>
-								if ActualBranch = '1' then
-									HisotryBuffer(TO_INTEGER(UNSIGNED(Index))) <= StronglyTaken;
-								else
-									HisotryBuffer(TO_INTEGER(UNSIGNED(Index))) <= WeaklyNotTaken;
-								end if;
-							when StronglyTaken =>
-								if ActualBranch = '1' then
-									HisotryBuffer(TO_INTEGER(UNSIGNED(Index))) <= StronglyTaken;
-								else
-									HisotryBuffer(TO_INTEGER(UNSIGNED(Index))) <= WeaklyTaken;
-								end if;
-							when others =>
-						end case;
+						State <= FORCAST;
 					when others =>
-						state <= PREDICT;
-				end case;
+						State <= FORCAST;
+				end case ;
 			end if;
 		end if;
-	end process Update; -- Update
+	end process; -- Update
 
 end Behavioral;
