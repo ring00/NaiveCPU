@@ -33,6 +33,8 @@ entity NorthBridge is
 	port (Clock : in std_logic;
 			Reset : in std_logic;
 			CPUClock : out std_logic;
+			
+			BootROM : in std_logic;
 
 			ReadEN : in std_logic;
 			WriteEN : in std_logic;
@@ -171,8 +173,11 @@ begin
 	process (Clock, Reset)
 	begin
 		if Reset = '1' then
-			state <= BOOT_START;
-			--state <= BOOT_COMPLETE;
+			if BootROM = '1' then
+				state <= BOOT_START;
+			else
+				state <= BOOT_COMPLETE;
+			end if;
 		elsif rising_edge(Clock) then
 			case state is
 				when BOOT =>

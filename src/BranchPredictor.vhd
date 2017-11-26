@@ -45,7 +45,7 @@ architecture Behavioral of BranchPredictor is
 
 	component RAM is
 		port (
-			a : in STD_LOGIC_VECTOR(7 downto 0);
+			a : in STD_LOGIC_VECTOR(3 downto 0);
 			d : in STD_LOGIC_VECTOR(1 downto 0);
 			clk : in STD_LOGIC;
 			we : in STD_LOGIC;
@@ -58,7 +58,7 @@ architecture Behavioral of BranchPredictor is
 	constant WeaklyNotTaken : STD_LOGIC_VECTOR(1 downto 0) := "10";
 	constant StronglyNotTaken : STD_LOGIC_VECTOR(1 downto 0) := "11";
 
-	signal BufferAddress : STD_LOGIC_VECTOR(7 downto 0);
+	signal BufferAddress : STD_LOGIC_VECTOR(3 downto 0);
 	signal BufferData : STD_LOGIC_VECTOR(1 downto 0);
 	signal BufferWE : STD_LOGIC;
 	signal BufferState : STD_LOGIC_VECTOR(1 downto 0);
@@ -72,8 +72,8 @@ architecture Behavioral of BranchPredictor is
 
 begin
 
-	BufferAddress <= PCInput(7 downto 0) when State = FORCAST else
-						  LastPC(7 downto 0) when State = AMEND else
+	BufferAddress <= PCInput(3 downto 0) when State = FORCAST else
+						  LastPC(3 downto 0) when State = AMEND else
 						  (others => '0');
 
 	BufferData <= StronglyTaken when (State = AMEND and BufferState = StronglyTaken and BranchTaken = '1') else

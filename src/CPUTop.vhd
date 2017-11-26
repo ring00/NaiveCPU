@@ -98,6 +98,8 @@ architecture Behavioral of CPUTop is
 				Reset : in std_logic;
 				CPUClock : out std_logic;
 
+				BootROM : in std_logic;
+
 				ReadEN : in std_logic;
 				WriteEN : in std_logic;
 
@@ -184,7 +186,7 @@ begin
 	LED <= InstData;
 	--LED <= (others => '0');
 
-	Clock <= ClockFX;
+	Clock <= Clock50 when SW(9) = '1' else ClockFX;
 	Reset <= not ResetInv;
 
 	CPUInstance : CPU port map (
@@ -203,6 +205,7 @@ begin
 		Clock => Clock,
 		Reset => Reset,
 		CPUClock => CPUClock,
+		BootROM => SW(8),
 		ReadEN => MemReadEN,
 		WriteEN => MemWriteEN,
 		Address1 => InstAddress,
