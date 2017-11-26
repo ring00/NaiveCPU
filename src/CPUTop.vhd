@@ -147,26 +147,44 @@ architecture Behavioral of CPUTop is
 
 	signal Number0 : STD_LOGIC_VECTOR(3 downto 0);
 	signal Number1 : STD_LOGIC_VECTOR(3 downto 0);
-	
+
+	component ClockManager
+	port(
+		CLKIN_IN : in STD_LOGIC;
+		RST_IN : in STD_LOGIC;          
+		CLKFX_OUT : out STD_LOGIC
+	);
+	end component;
+
 	signal Clock : STD_LOGIC;
+	signal ClockFX : STD_LOGIC;
 
 begin
+
+	ClockManagerInstance : ClockManager port map (
+		CLKIN_IN => Clock50,
+		RST_IN => Reset,
+		CLKFX_OUT => ClockFX
+	);
 
 	Seg0 : Seg7 port map (
 		Number0, DYP0
 	);
+	--DYP0 <= (others => '0');
 
 	Number0 <= InstAddress(7 downto 4);
 
 	Seg1 : Seg7 port map(
 		Number1, DYP1
 	);
+	--DYP1 <= (others => '0');
 
 	Number1 <= InstAddress(3 downto 0);
 
 	LED <= InstData;
+	--LED <= (others => '0');
 
-	Clock <= Clock11;
+	Clock <= ClockFX;
 	Reset <= not ResetInv;
 
 	CPUInstance : CPU port map (
@@ -182,7 +200,7 @@ begin
 	);
 
 	NorthBridgeInstance : NorthBridge port map (
-		Clock => Clock50,
+		Clock => Clock,
 		Reset => Reset,
 		CPUClock => CPUClock,
 		ReadEN => MemReadEN,
