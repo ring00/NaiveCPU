@@ -30,6 +30,9 @@ entity WASDToAcc is
 	);
 end entity;
 
+library ieee;
+use ieee.std_logic_1164.all;
+
 entity CPUKeyboard is
 	port (
 		ps2_data, ps2_clk: in std_logic;
@@ -138,7 +141,7 @@ begin
 	begin
 		if rising_edge(clk) then
 			if done = '1' then
-				ok <= '0'
+				ok <= '0';
 			else
 				if w = '1' and last_key /= x"77" then
 					last_key <= x"77";

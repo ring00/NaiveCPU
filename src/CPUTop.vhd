@@ -180,7 +180,7 @@ architecture Behavioral of CPUTop is
 
 	signal KeyboardRDN : STD_LOGIC;
 	signal KeyboardDATA_READY : STD_LOGIC;
-	signal KeyboardData : STD_LOGIC
+	signal KeyboardData : STD_LOGIC_VECTOR(7 downto 0);
 
 begin
 

@@ -338,5 +338,10 @@ NET "Ram2WE" SLEW = SLOW;
 NET "SerialRDN" SLEW = SLOW;
 NET "SerialWRN" SLEW = SLOW;
 #Created by Constraints Editor (xc3s1200e-fg320-4) - 2017/11/26
-NET "Clock50" TNM_NET = Clock50;
-TIMESPEC TS_Clock50 = PERIOD "Clock50" 20 ns HIGH 50%;
+NET "Clock50" TNM_NET = "Clock50";
+TIMESPEC TS_Clock50 = PERIOD "Clock50" 20 ns HIGH 50 %;
+
+# PlanAhead Generated physical constraints 
+
+NET "PS2Clock" LOC = U6;
+NET "PS2Data" LOC = V6;
