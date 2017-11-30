@@ -55,6 +55,9 @@ entity CPUTop is
 			SerialTBRE : in STD_LOGIC;
 			SerialTSRE : in STD_LOGIC;
 
+			PS2Clock : in STD_LOGIC;
+			PS2Data : in STD_LOGIC;
+
 			FlashByte : out STD_LOGIC;
 			FlashVpen : out STD_LOGIC;
 			FlashCE : out STD_LOGIC;
@@ -125,6 +128,10 @@ architecture Behavioral of CPUTop is
 				SerialTBRE : in std_logic;
 				SerialDataBus : inout std_logic_vector(7 downto 0);
 
+				KeyboardRDN : out std_logic;
+				KeyboardDATA_READY : in std_logic;
+				KeyboardData : in std_logic_vector(7 downto 0);
+
 				FlashByte : out std_logic;
 				FlashVpen : out std_logic;
 				FlashCE : out std_logic;
@@ -153,13 +160,27 @@ architecture Behavioral of CPUTop is
 	component ClockManager
 	port(
 		CLKIN_IN : in STD_LOGIC;
-		RST_IN : in STD_LOGIC;          
+		RST_IN : in STD_LOGIC;
 		CLKFX_OUT : out STD_LOGIC
 	);
 	end component;
 
 	signal Clock : STD_LOGIC;
 	signal ClockFX : STD_LOGIC;
+
+	component CPUKeyboard is
+		port (
+			ps2_data, ps2_clk: in std_logic;
+			clk, rst: in std_logic;
+			done: in std_logic;
+			ok: out std_logic;
+			key: out STD_LOGIC_VECTOR(7 downto 0)
+		);
+	end component;
+
+	signal KeyboardRDN : STD_LOGIC;
+	signal KeyboardDATA_READY : STD_LOGIC;
+	signal KeyboardData : STD_LOGIC
 
 begin
 
@@ -225,7 +246,9 @@ begin
 		SerialTSRE => SerialTSRE,
 		SerialTBRE => SerialTBRE,
 		SerialDataBus => Ram1Data(7 downto 0),
-
+		KeyboardRDN => KeyboardRDN,
+		KeyboardDATA_READY => KeyboardDATA_READY,
+		KeyboardData => KeyboardData,
 		FlashByte => FlashByte,
 		FlashVpen => FlashVpen,
 		FlashCE => FlashCE,
@@ -240,5 +263,15 @@ begin
 	Ram1Addr <= (others => '0');
 	Ram1OE <= '1';
 	Ram1WE <= '1';
+
+	CPUKeyboardInstance : CPUKeyboard port map (
+		ps2_data => PS2Data,
+		ps2_clk => PS2Clock,
+		clk => Clock,
+		rst => Reset,
+		done => KeyboardRDN,
+		ok => KeyboardDATA_READY,
+		key => KeyboardData
+	);
 
 end Behavioral;

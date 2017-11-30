@@ -33,7 +33,7 @@ entity NorthBridge is
 	port (Clock : in std_logic;
 			Reset : in std_logic;
 			CPUClock : out std_logic;
-			
+
 			BootROM : in std_logic;
 
 			ReadEN : in std_logic;
@@ -52,7 +52,7 @@ entity NorthBridge is
 			MemoryOE : out std_logic;
 			MemoryWE : out std_logic;
 
-			RAM1EN : out std_logic;
+			Ram1EN : out std_logic;
 
 			SerialWRN : out std_logic;
 			SerialRDN : out std_logic;
@@ -60,6 +60,10 @@ entity NorthBridge is
 			SerialTSRE : in std_logic;
 			SerialTBRE : in std_logic;
 			SerialDataBus : inout std_logic_vector(7 downto 0);
+
+			KeyboardRDN : out std_logic;
+			KeyboardDATA_READY : in std_logic;
+			KeyboardData : in std_logic_vector(7 downto 0);
 
 			FlashByte : out std_logic;
 			FlashVpen : out std_logic;
@@ -132,7 +136,7 @@ begin
 	);
 
 	MemoryEN <= '0';
-	RAM1EN <= '1';
+	Ram1EN <= '1';
 
 	DataOutput1 <= MemoryDataBus;
 	DataOutput2 <= BufferData2;
@@ -140,33 +144,35 @@ begin
 	CPUClock <= '0' when state=INS_READ else '1';
 
 	MemoryWE <= '1' when (Address2=x"BF00" and state=DATA_RW) else
-				'1' when (Address2=x"BF01" and state=DATA_RW) else
-				'1' when (Address2=x"BF02" and state=DATA_RW) else
-				'1' when (Address2=x"BF03" and state=DATA_RW) else
-				not WriteEN when state=DATA_RW else
-				'0' when state=BOOT_RAM else
-				'1';
+					'1' when (Address2=x"BF01" and state=DATA_RW) else
+					'1' when (Address2=x"BF02" and state=DATA_RW) else
+					'1' when (Address2=x"BF03" and state=DATA_RW) else
+					not WriteEN when state=DATA_RW else
+					'0' when state=BOOT_RAM else
+					'1';
 	MemoryOE <= not ReadEN when state=DATA_RW else
-				'0' when state=INS_READ else
-				'1';
+					'0' when state=INS_READ else
+					'1';
 
 	MemoryBusFlag <= not WriteEN when (state=DATA_PRE or state=DATA_RW) else
-					'0' when (state=BOOT_RAM or state=BOOT_FLASH) else
-					'1';
+						  '0' when (state=BOOT_RAM or state=BOOT_FLASH) else
+						  '1';
 	SerialBusFlag <= not WriteEN;
 	MemoryBusHolder <= FlashReadData when (state=BOOT_FLASH or state=BOOT_RAM) else DataInput2;
 	MemoryDataBus <= MemoryBusHolder when MemoryBusFlag='0' else (others => 'Z');
 	SerialDataBus <= DataInput2(7 downto 0) when SerialBusFlag='0' else (others => 'Z');
 
 	MemoryAddress <= "00" & FlashBootMemAddr when (state=BOOT_FLASH or state=BOOT_RAM) else
-					"00" & Address1 when state=INS_READ else
-					"00" & Address2;
+						  "00" & Address1 when state=INS_READ else
+						  "00" & Address2;
 
 	SerialRDN <= not ReadEN when (Address2=x"BF00" and (state=DATA_PRE or state=DATA_RW)) else '1';
 	SerialWRN <= not WriteEN when (Address2=x"BF00" and (state=INS_READ or state=DATA_RW)) else '1';
 
+	KeyboardRDN <= '1' when (Address2=x"BF02" and state=DATA_RW) else '0';
+
 	BF01 <= "00000000000000" & SerialDATA_READY & (SerialTSRE and SerialTBRE);
-	BF03 <= (others => '0');
+	BF03 <= "000000000000000" & KeyboardDATA_READY;
 
 	ctl_read <= '0' when state=BOOT_FLASH else '1';
 
@@ -178,7 +184,7 @@ begin
 			else
 				state <= BOOT_COMPLETE;
 			end if;
-		elsif rising_edge(Clock) then
+		elsif RISING_EDGE(Clock) then
 			case state is
 				when BOOT =>
 					state <= BOOT;
@@ -191,19 +197,19 @@ begin
 					case FlashTimer is
 						when "00000000" =>
 							FlashAddrInput <= FlashBootAddr;
-							FlashTimer <= STD_LOGIC_VECTOR(unsigned(FlashTimer) + 1);
+							FlashTimer <= STD_LOGIC_VECTOR(UNSIGNED(FlashTimer) + 1);
 							state <= BOOT_FLASH;
 						when "11111111" =>
 							state <= BOOT_RAM;
 							FlashReadData <= FlashDataOutput;
 							FlashTimer <= "00000000";
 						when others =>
-							FlashTimer <= STD_LOGIC_VECTOR(unsigned(FlashTimer) + 1);
+							FlashTimer <= STD_LOGIC_VECTOR(UNSIGNED(FlashTimer) + 1);
 							state <= BOOT_FLASH;
 					end case;
 				when BOOT_RAM =>
-					FlashBootAddr <= STD_LOGIC_VECTOR(unsigned(FlashBootAddr) + 2);
-					FlashBootMemAddr <= STD_LOGIC_VECTOR(unsigned(FlashBootMemAddr) + 1);
+					FlashBootAddr <= STD_LOGIC_VECTOR(UNSIGNED(FlashBootAddr) + 2);
+					FlashBootMemAddr <= STD_LOGIC_VECTOR(UNSIGNED(FlashBootMemAddr) + 1);
 					if FlashBootMemAddr < x"0FFF" then
 						state <= BOOT_FLASH;
 					else
@@ -225,7 +231,7 @@ begin
 						when x"BF01" =>
 							BufferData2 <= BF01;
 						when x"BF02" =>
-							BufferData2 <= (others => '0');
+							BufferData2 <= "00000000" & KeyboardData;
 						when x"BF03" =>
 							BufferData2 <= BF03;
 						when others =>
