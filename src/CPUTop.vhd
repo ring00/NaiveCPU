@@ -168,13 +168,15 @@ architecture Behavioral of CPUTop is
 	signal Clock : STD_LOGIC;
 	signal ClockFX : STD_LOGIC;
 
-	component CPUKeyboard is
+	component KeyboardAdapter is
 		port (
-			ps2_data, ps2_clk: in std_logic;
-			clk, rst: in std_logic;
-			done: in std_logic;
-			ok: out std_logic;
-			key: out STD_LOGIC_VECTOR(7 downto 0)
+			PS2Data : in std_logic; -- PS2 data
+			PS2Clock : in std_logic; -- PS2 clk
+			Clock : in std_logic;
+			Reset : in std_logic;
+			DataReceive : in std_logic;
+			DataReady : out std_logic ;  -- data output enable signal
+			Output : out std_logic_vector(7 downto 0) -- scan code signal output
 		);
 	end component;
 
@@ -264,14 +266,14 @@ begin
 	Ram1OE <= '1';
 	Ram1WE <= '1';
 
-	CPUKeyboardInstance : CPUKeyboard port map (
-		ps2_data => PS2Data,
-		ps2_clk => PS2Clock,
-		clk => Clock,
-		rst => Reset,
-		done => KeyboardRDN,
-		ok => KeyboardDATA_READY,
-		key => KeyboardData
+	KeyboardAdapterInstance : KeyboardAdapter port map (
+		PS2Data => PS2Data,
+		PS2Clock => PS2Clock,
+		Clock => Clock,
+		Reset => Reset,
+		DataReceive => KeyboardRDN,
+		DataReady => KeyboardDATA_READY,
+		Output => KeyboardData
 	);
 
 end Behavioral;

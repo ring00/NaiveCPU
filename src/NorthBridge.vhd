@@ -169,7 +169,7 @@ begin
 	SerialRDN <= not ReadEN when (Address2=x"BF00" and (state=DATA_PRE or state=DATA_RW)) else '1';
 	SerialWRN <= not WriteEN when (Address2=x"BF00" and (state=INS_READ or state=DATA_RW)) else '1';
 
-	KeyboardRDN <= '1' when (Address2=x"BF02" and state=DATA_RW) else '0';
+	KeyboardRDN <= '0' when (Address2=x"BF02" and state=DATA_RW) else '1';
 
 	BF01 <= "00000000000000" & SerialDATA_READY & (SerialTSRE and SerialTBRE);
 	BF03 <= "000000000000000" & KeyboardDATA_READY;

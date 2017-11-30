@@ -1,165 +1,158 @@
-library ieee;
-use ieee.std_logic_1164.all;
+----------------------------------------------------------------------------------
+-- Company:
+-- Engineer:
+--
+-- Create Date:    21:05:13 11/30/2017
+-- Design Name:
+-- Module Name:    Keyboard - Behavioral
+-- Project Name:
+-- Target Devices:
+-- Tool versions:
+-- Description:
+--
+-- Dependencies:
+--
+-- Revision:
+-- Revision 0.01 - File Created
+-- Additional Comments:
+--
+----------------------------------------------------------------------------------
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx primitives in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
 
 entity Keyboard is
-	port (
-		ps2_data, ps2_clk: in std_logic;
-		clk, rst: in std_logic;
-		ax, ay: out integer
-	);
-end entity;
+	port (PS2Data : in STD_LOGIC; -- PS2 data
+			PS2Clock : in STD_LOGIC; -- PS2 clk
+			Clock : in STD_LOGIC;
+			Reset : in STD_LOGIC;
+			DataReceive : in STD_LOGIC;
+			DataReady : out STD_LOGIC;  -- data output enable signal
+			Output : out STD_LOGIC_VECTOR(7 downto 0)); -- scan code signal output
+end Keyboard;
 
-library ieee;
-use ieee.std_logic_1164.all;
+architecture Behavioral of Keyboard is
 
-entity KeyboardToWASD is
-	port (
-		ps2_data, ps2_clk: in std_logic;
-		clk, rst: in std_logic;
-		w, a, s, d, up, left, down, right: out std_logic
-	);
-end entity;
+	type STATE_TYPE is (DELAY, START, S0, S1, S2, S3, S4, S5, S6, S7, PARITY, STOP, FINISH);
+	signal data, clk, clk1, clk2, odd, fokSignal : STD_LOGIC;
+	signal code : STD_LOGIC_VECTOR(7 downto 0);
+	signal OutputCode : STD_LOGIC_VECTOR(7 downto 0);
+	signal flag : STD_LOGIC;
+	signal state : STATE_TYPE;
 
-library ieee;
-use ieee.std_logic_1164.all;
-
-entity WASDToAcc is
-	port (
-		w, a, s, d: in std_logic;
-		ax, ay: out integer
-	);
-end entity;
-
-library ieee;
-use ieee.std_logic_1164.all;
-
-entity CPUKeyboard is
-	port (
-		ps2_data, ps2_clk: in std_logic;
-		clk, rst: in std_logic;
-		done: in std_logic;
-		ok: out std_logic;
-		key: out std_logic_vector(7 downto 0)
-	);
-end entity;
-
---------------------------------------------------
-
-architecture arch of Keyboard is
-	component KeyboardToWASD is
-		port (
-			ps2_data, ps2_clk: in std_logic;
-			clk, rst: in std_logic;
-			w, a, s, d: out std_logic
-		);
-	end component;
-	component WASDToAcc is
-		port (
-			w, a, s, d: in std_logic;
-			ax, ay: out integer
-		);
-	end component;
-	signal w, a, s, d: std_logic;
 begin
-	ktw: KeyboardToWASD port map (ps2_data, ps2_clk, clk, rst, w, a, s, d);
-	wta: WASDToAcc port map (w, a, s, d, ax, ay);
-end arch ; -- arch
+	clk1 <= PS2Clock when rising_edge(Clock);
+	clk2 <= clk1 when rising_edge(Clock);
+	clk <= (not clk1) and clk2;
+	data <= PS2Data when rising_edge(Clock);
+	odd <= code(0) xor code(1) xor code(2) xor code(3) xor code(4) xor code(5) xor code(6) xor code(7);
+	OutputCode <= code when fokSignal = '1';
 
-
-architecture arch of KeyboardToWASD is
-	component KeyboardScancode is
-	port (
-		datain, clkin : in std_logic ; -- PS2 clk and data
-		fclk, rst : in std_logic ;  -- filter clock
-		ok : out std_logic ;
-		scancode : out std_logic_vector(7 downto 0) -- scan code signal output
-		);
-	end component ;
-	signal ok: std_logic;
-	signal scancode, last1, last2, lastclk: std_logic_vector(7 downto 0) := x"00";
-	signal w1, a1, s1, d1, up1, down1, left1, right1: std_logic := '0';
-	signal isBreak, isE0: boolean := false;
-	constant c_break: std_logic_vector(7 downto 0) := x"F0";
-	constant c_E0: std_logic_vector(7 downto 0) := x"E0";
-	constant c_w: std_logic_vector(7 downto 0) := x"1D";
-	constant c_a: std_logic_vector(7 downto 0) := x"1C";
-	constant c_s: std_logic_vector(7 downto 0) := x"1B";
-	constant c_d: std_logic_vector(7 downto 0) := x"23";
-	constant c_up: std_logic_vector(7 downto 0) := x"75";
-	constant c_left: std_logic_vector(7 downto 0) := x"6B";
-	constant c_down: std_logic_vector(7 downto 0) := x"72";
-	constant c_right: std_logic_vector(7 downto 0) := x"74";
-begin
-	ks: KeyboardScancode port map (ps2_data, ps2_clk, clk, rst, ok, scancode);
-
-	isbreak <= last1 = c_break;
-	isE0 <= last1 = c_E0 or last2 = c_E0;
-	w <= w1; a <= a1; s <= s1; d <= d1;
-	up <= up1; down <= down1; left <= left1; right <= right1;
-	
-	process( clk )
+	process(Reset, Clock)
 	begin
-		if rising_edge(clk) and ok = '1' then
-		case( scancode ) is
-			when c_w => if isBreak then w1 <= '0'; else w1 <= '1'; end if;
-			when c_a => if isBreak then a1 <= '0'; else a1 <= '1'; end if;
-			when c_s => if isBreak then s1 <= '0'; else s1 <= '1'; end if;
-			when c_d => if isBreak then d1 <= '0'; else d1 <= '1'; end if;
-			when c_up => if isE0 then if isBreak then up1 <= '0'; else up1 <= '1'; end if; end if;
-			when c_down => if isE0 then if isBreak then down1 <= '0'; else down1 <= '1'; end if; end if;
-			when c_left => if isE0 then if isBreak then left1 <= '0'; else left1 <= '1'; end if; end if;
-			when c_right => if isE0 then if isBreak then right1 <= '0'; else right1 <= '1'; end if; end if;
-			when others => null;
-		end case ;
-		last2 <= last1;
-		last1 <= scancode;
-		end if;
-	end process ;
-end arch ; -- arch
+		if Reset = '1' then
+			state <= DELAY;
+			code <= (others => '0');
+			fokSignal <= '1';
+			code <= "00000000";
+			fokSignal <= '0';
+			DataReady <= '0';
+			flag <= '0';
+		elsif RISING_EDGE(Clock) then
+			fokSignal <= '0';
+			case state is
+				when DELAY =>
+					state <= START;
+				when START =>
+					if (clk = '1') then
+						if data = '0' then
+							state <= S0;
+						else
+							state <= DELAY;
+						end if;
+					end if;
+				when S0 =>
+					if (clk = '1') then
+						code(0) <= data;
+						state <= S1;
+					end if;
+				when S1 =>
+					if (clk = '1') then
+						code(1) <= data;
+						state <= S2;
+					end if;
+				when S2 =>
+					if (clk = '1') then
+						code(2) <= data;
+						state <= S3;
+					end if ;
+				when S3 =>
+					if (clk = '1') then
+						code(3) <= data;
+						state <= S4;
+					end if;
+				when S4 =>
+					if (clk = '1') then
+						code(4) <= data;
+						state <= S5;
+					end if;
+				when S5 =>
+					if (clk = '1') then
+						code(5) <= data;
+						state <= S6;
+					end if;
+				when S6 =>
+					if (clk = '1') then
+						code(6) <= data;
+						state <= S7;
+					end if;
+				when S7 =>
+					if (clk = '1') then
+						code(7) <= data;
+						state <= PARITY;
+					end if;
+				when PARITY =>
+					if (clk = '1') then
+						if (data xor odd) = '1' then
+							state <= STOP;
+						else
+							state <= DELAY;
+						end if;
+					end if;
+				when STOP =>
+					if (clk = '1') then
+						if (data = '1') then
+							state <= FINISH;
+						else
+							state <= DELAY;
+						end if;
+					end if;
+				when FINISH =>
+					state <= DELAY;
+					fokSignal <= '1';
+				when others =>
+					state <= DELAY;
+			end case;
 
-
-architecture arch of WASDToAcc is
-begin
-	ay <= 1 when s = '1' else -1 when w = '1' else 0;
-	ax <= 1 when d = '1' else -1 when a = '1' else 0;
-end arch ; -- arch
-
-architecture arch of CPUKeyboard is 
-	component KeyboardToWASD is
-		port (
-			ps2_data, ps2_clk: in std_logic;
-			clk, rst: in std_logic;
-			w, a, s, d: out std_logic
-		);
-	end component;
-	signal w, a, s, d: std_logic;
-	signal last_key: std_logic_vector(7 downto 0);
-begin
-	ktw: KeyboardToWASD port map (ps2_data, ps2_clk, clk, rst, w, a, s, d);
-	key <= last_key;
-	process( clk )
-	begin
-		if rising_edge(clk) then
-			if done = '1' then
-				ok <= '0';
-			else
-				if w = '1' and last_key /= x"77" then
-					last_key <= x"77";
-					ok <= '1';
-				end if;
-				if a = '1' and last_key /= x"61" then
-					last_key <= x"61";
-					ok <= '1';
-				end if;
-				if s = '1' and last_key /= x"73" then
-					last_key <= x"73";
-					ok <= '1';
-				end if;
-				if d = '1' and last_key /= x"64" then
-					last_key <= x"64";
-					ok <= '1';
-				end if;
+			if (OutputCode = "11110000") then
+				flag <= '1';
+			elsif (flag = '1') then
+				DataReady <= '1';
+				Output <= OutputCode;
+				flag <= '0';
+			end if;
+			if DataReceive = '0' then
+				DataReady <= '0';
 			end if;
 		end if;
 	end process;
-end arch;
+end Behavioral;
+
