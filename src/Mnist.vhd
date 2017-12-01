@@ -38,7 +38,7 @@ component Vga640480 is
 			Image			:			in STD_LOGIC_VECTOR(3 downto 0);
 			Answer		:			in STD_LOGIC_VECTOR(3 downto 0);
 			Reset       :         in  STD_LOGIC;
-			Clk50       :		  out STD_LOGIC; 
+			Clk25       :		  out STD_LOGIC; 
 			Q		    :		  in STD_LOGIC_VECTOR(0 downto 0);
 			Clk_0       :         in  STD_LOGIC; --100M时钟输入
 			Hs,Vs       :         out STD_LOGIC; --行同步、场同步信号
@@ -46,7 +46,7 @@ component Vga640480 is
 	  );
 end component;
 
-component Digital_rom IS
+component DigitalRom IS
 	PORT
 	(
 		Address		: IN STD_LOGIC_VECTOR (13 DOWNTO 0);
@@ -56,7 +56,7 @@ component Digital_rom IS
 END component;
 
 signal address_tmp: STD_LOGIC_VECTOR(13 downto 0);
-signal Clk50: STD_LOGIC;
+signal Clk25: STD_LOGIC;
 signal q_tmp: STD_LOGIC_VECTOR(0 downto 0);
 signal frame: STD_LOGIC_VECTOR(3 downto 0);
 
@@ -67,15 +67,15 @@ u1: vga640480 port map(
 						Image=>Image,
 						Answer=>Answer,
 						Reset=>Reset, 
-						Clk50=>Clk50, 
+						Clk25=>Clk25, 
 						Q=>q_tmp, 
 						Clk_0=>Clk_0, 
 						Hs=>Hs, Vs=>Vs, 
 						R=>R, G=>G, B=>B
 					);
-u2: digital_rom port map(	
+u2: DigitalRom port map(	
 						Address=>address_tmp, 
-						clock=>Clk50, 
+						clock=>Clk25, 
 						Q=>q_tmp
 					);
 end Behavioral;
