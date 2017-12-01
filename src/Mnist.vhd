@@ -33,17 +33,17 @@ end Mnist;
 architecture Behavioral of Mnist is
 
 component Vga640480 is
-	 port(
-			Address		:		  out	STD_LOGIC_VECTOR(13 DOWNTO 0);
-			Image			:			in STD_LOGIC_VECTOR(3 downto 0);
-			Answer		:			in STD_LOGIC_VECTOR(3 downto 0);
-			Reset       :         in  STD_LOGIC;
-			Clk25       :		  out STD_LOGIC; 
-			Q		    :		  in STD_LOGIC_VECTOR(0 downto 0);
-			Clk_0       :         in  STD_LOGIC; --100M时钟输入
-			Hs,Vs       :         out STD_LOGIC; --行同步、场同步信号
-			R,G,B       :         out STD_LOGIC_VECTOR(2 downto 0)
-	  );
+	port(
+		Address		:		  out	STD_LOGIC_VECTOR(13 DOWNTO 0);
+		Image			:			in STD_LOGIC_VECTOR(3 downto 0);
+		Answer		:			in STD_LOGIC_VECTOR(3 downto 0);
+		Reset       :         in  STD_LOGIC;
+		Clk25       :		  out STD_LOGIC; 
+		Q		    :		  in STD_LOGIC_VECTOR(0 downto 0);
+		Clk_0       :         in  STD_LOGIC; --100M时钟输入
+		Hs,Vs       :         out STD_LOGIC; --行同步、场同步信号
+		R,G,B       :         out STD_LOGIC_VECTOR(2 downto 0)
+	);
 end component;
 
 component DigitalRom IS
