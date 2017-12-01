@@ -105,53 +105,53 @@ architecture Behavioral of CPUTop is
 	signal MemWriteEN : STD_LOGIC;
 
 	component NorthBridge is
-		port (Clock : in std_logic;
-				Reset : in std_logic;
-				CPUClock : out std_logic;
+		Port (Clock : in STD_LOGIC;
+				Reset : in STD_LOGIC;
+				CPUClock : out STD_LOGIC;
 
-				BootROM : in std_logic;
+				BootROM : in STD_LOGIC;
 
-				ReadEN : in std_logic;
-				WriteEN : in std_logic;
+				ReadEN : in STD_LOGIC;
+				WriteEN : in STD_LOGIC;
 
-				Address1 : in std_logic_vector(15 downto 0);
-				DataOutput1 : out std_logic_vector(15 downto 0);
+				Address1 : in STD_LOGIC_VECTOR(15 downto 0);
+				DataOutput1 : out STD_LOGIC_VECTOR(15 downto 0);
 
-				Address2 : in std_logic_vector(15 downto 0);
-				DataInput2 : in std_logic_vector(15 downto 0);
-				DataOutput2 : out std_logic_vector(15 downto 0);
+				Address2 : in STD_LOGIC_VECTOR(15 downto 0);
+				DataInput2 : in STD_LOGIC_VECTOR(15 downto 0);
+				DataOutput2 : out STD_LOGIC_VECTOR(15 downto 0);
 
-				MemoryAddress : out std_logic_vector(17 downto 0);
-				MemoryDataBus : inout std_logic_vector(15 downto 0);
-				MemoryEN : out std_logic;
-				MemoryOE : out std_logic;
-				MemoryWE : out std_logic;
+				MemoryAddress : out STD_LOGIC_VECTOR(17 downto 0);
+				MemoryDataBus : inout STD_LOGIC_VECTOR(15 downto 0);
+				MemoryEN : out STD_LOGIC;
+				MemoryOE : out STD_LOGIC;
+				MemoryWE : out STD_LOGIC;
 
-				RAM1EN : out std_logic;
+				RAM1EN : out STD_LOGIC;
 
-				SerialWRN : out std_logic;
-				SerialRDN : out std_logic;
-				SerialDATA_READY : in std_logic;
-				SerialTSRE : in std_logic;
-				SerialTBRE : in std_logic;
-				SerialDataBus : inout std_logic_vector(7 downto 0);
+				SerialWRN : out STD_LOGIC;
+				SerialRDN : out STD_LOGIC;
+				SerialDATA_READY : in STD_LOGIC;
+				SerialTSRE : in STD_LOGIC;
+				SerialTBRE : in STD_LOGIC;
+				SerialDataBus : inout STD_LOGIC_VECTOR(7 downto 0);
 
-				KeyboardRDN : out std_logic;
-				KeyboardDATA_READY : in std_logic;
-				KeyboardData : in std_logic_vector(7 downto 0);
+				KeyboardRDN : out STD_LOGIC;
+				KeyboardDATA_READY : in STD_LOGIC;
+				KeyboardData : in STD_LOGIC_VECTOR(7 downto 0);
 
 				VGAWriteEn : out STD_LOGIC;
 				VGAWriteAddress : out STD_LOGIC_VECTOR(11 downto 0);
 				VGAWriteData : out STD_LOGIC_VECTOR(7 downto 0);
 
-				FlashByte : out std_logic;
-				FlashVpen : out std_logic;
-				FlashCE : out std_logic;
-				FlashOE : out std_logic;
-				FlashWE : out std_logic;
-				FlashRP : out std_logic;
-				FlashAddr : out std_logic_vector(22 downto 0);
-				FlashData : inout std_logic_vector(15 downto 0));
+				FlashByte : out STD_LOGIC;
+				FlashVpen : out STD_LOGIC;
+				FlashCE : out STD_LOGIC;
+				FlashOE : out STD_LOGIC;
+				FlashWE : out STD_LOGIC;
+				FlashRP : out STD_LOGIC;
+				FlashAddr : out STD_LOGIC_VECTOR(22 downto 0);
+				FlashData : inout STD_LOGIC_VECTOR(15 downto 0));
 	end component;
 
 	signal CPUClock : STD_LOGIC;
@@ -163,36 +163,30 @@ architecture Behavioral of CPUTop is
 	signal VGAWriteData : STD_LOGIC_VECTOR(7 downto 0);
 
 	component Seg7 is
-	port(
-		Number : in STD_LOGIC_VECTOR(3 downto 0);
-		Dispaly : out STD_LOGIC_VECTOR(6 downto 0)
-	);
+		Port (Number : in STD_LOGIC_VECTOR(3 downto 0);
+				Dispaly : out STD_LOGIC_VECTOR(6 downto 0));
 	end component;
 
 	signal Number0 : STD_LOGIC_VECTOR(3 downto 0);
 	signal Number1 : STD_LOGIC_VECTOR(3 downto 0);
 
 	component ClockManager
-	port(
-		CLKIN_IN : in STD_LOGIC;
-		RST_IN : in STD_LOGIC;
-		CLKFX_OUT : out STD_LOGIC
-	);
+		Port (CLKIN_IN : in STD_LOGIC;
+				RST_IN : in STD_LOGIC;
+				CLKFX_OUT : out STD_LOGIC);
 	end component;
 
 	signal Clock : STD_LOGIC;
 	signal ClockFX : STD_LOGIC;
 
-	component KeyboardAdapter is
-		port (
-			PS2Data : in std_logic; -- PS2 data
-			PS2Clock : in std_logic; -- PS2 clk
-			Clock : in std_logic;
-			Reset : in std_logic;
-			DataReceive : in std_logic;
-			DataReady : out std_logic ;  -- data output enable signal
-			Output : out std_logic_vector(7 downto 0) -- scan code signal output
-		);
+	component KeyboardTop is
+		Port (PS2Data : in STD_LOGIC; -- PS2 data
+				PS2Clock : in STD_LOGIC; -- PS2 clk
+				Clock : in STD_LOGIC;
+				Reset : in STD_LOGIC;
+				DataReceive : in STD_LOGIC;
+				DataReady : out STD_LOGIC ;  -- data output enable signal
+				Output : out STD_LOGIC_VECTOR(7 downto 0)); -- scan code signal output
 	end component;
 
 	signal KeyboardRDN : STD_LOGIC;
@@ -211,31 +205,33 @@ architecture Behavioral of CPUTop is
 
 begin
 
+	Ram1Data(15 downto 8) <= (others => 'Z'); -- DON'T CARE
+	Ram1Addr <= (others => 'Z'); -- DON'T CARE
+	Ram1OE <= '1';
+	Ram1WE <= '1';
+
 	ClockManagerInstance : ClockManager port map (
 		CLKIN_IN => Clock50,
 		RST_IN => Reset,
 		CLKFX_OUT => ClockFX
 	);
 
-	Seg0 : Seg7 port map (
-		Number0, DYP0
-	);
-	--DYP0 <= (others => '0');
-
 	Number0 <= InstAddress(7 downto 4);
-
-	Seg1 : Seg7 port map(
-		Number1, DYP1
+	Seg0 : Seg7 port map (
+		Number => Number0,
+		Display => DYP0
 	);
-	--DYP1 <= (others => '0');
 
 	Number1 <= InstAddress(3 downto 0);
+	Seg1 : Seg7 port map(
+		Number => Number1,
+		Display => DYP1
+	);
 
 	LED <= InstData;
-	--LED <= (others => '0');
 
-	Clock <= Clock50 when SW(9) = '1' else ClockFX;
 	Reset <= not ResetInv;
+	Clock <= Clock50 when SW(9) = '1' else ClockFX;
 
 	CPUInstance : CPU port map (
 		Clock => CPUClock,
@@ -266,7 +262,7 @@ begin
 		MemoryEN => Ram2EN,
 		MemoryOE => Ram2OE,
 		MemoryWE => Ram2WE,
-		RAM1EN => Ram1EN,
+		Ram1EN => Ram1EN,
 		SerialWRN => SerialWRN,
 		SerialRDN => SerialRDN,
 		SerialDATA_READY => SerialDataReady,
@@ -289,12 +285,7 @@ begin
 		FlashData => FlashData
 	);
 
-	Ram1Data(15 downto 8) <= (others => '0');
-	Ram1Addr <= (others => '0');
-	Ram1OE <= '1';
-	Ram1WE <= '1';
-
-	KeyboardAdapterInstance : KeyboardAdapter port map (
+	KeyboardTopInstance : KeyboardTop port map (
 		PS2Data => PS2Data,
 		PS2Clock => PS2Clock,
 		Clock => Clock,

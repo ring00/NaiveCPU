@@ -386,7 +386,7 @@ begin
 
 	IFAdderInstance : Adder port map (
 		InputA => IFPC,
-		InputB => x"0001",
+		InputB => X"0001",
 		Output => IFAdderOutput
 	);
 
@@ -638,4 +638,4 @@ begin
 -- WB END
 
 end Behavioral;
- 
+

@@ -4,7 +4,7 @@
 --
 -- Create Date:    01:13:23 11/27/2015
 -- Design Name:
--- Module Name:    FlashAdapter - Behavioral
+-- Module Name:    Flash - Behavioral
 -- Project Name:
 -- Target Devices:
 -- Tool versions:
@@ -29,27 +29,25 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity FlashAdapter is
-	port (
-		Clock : in STD_LOGIC;
-		Reset : in STD_LOGIC;
-		Address : in STD_LOGIC_VECTOR(22 downto 0);
-		OutputData : out STD_LOGIC_VECTOR(15 downto 0);
-		ctl_read : in STD_LOGIC;
+entity Flash is
+	Port (Clock : in STD_LOGIC;
+			Reset : in STD_LOGIC;
+			Address : in STD_LOGIC_VECTOR(22 downto 0);
+			OutputData : out STD_LOGIC_VECTOR(15 downto 0);
+			ctl_read : in STD_LOGIC;
 
-		FlashByte : out STD_LOGIC;
-		FlashVpen : out STD_LOGIC;
-		FlashCE : out STD_LOGIC;
-		FlashOE : out STD_LOGIC;
-		FlashWE : out STD_LOGIC;
-		FlashRP : out STD_LOGIC;
+			FlashByte : out STD_LOGIC;
+			FlashVpen : out STD_LOGIC;
+			FlashCE : out STD_LOGIC;
+			FlashOE : out STD_LOGIC;
+			FlashWE : out STD_LOGIC;
+			FlashRP : out STD_LOGIC;
 
-		FlashAddr : out STD_LOGIC_VECTOR(22 downto 0);
-		FlashData : inout STD_LOGIC_VECTOR(15 downto 0)
-	);
-end FlashAdapter;
+			FlashAddr : out STD_LOGIC_VECTOR(22 downto 0);
+			FlashData : inout STD_LOGIC_VECTOR(15 downto 0));
+end Flash;
 
-architecture Behavioral of FlashAdapter is
+architecture Behavioral of Flash is
 	type STATE_TYPE is (INIT, READ1, READ2, READ3, READ4);
 	signal state : STATE_TYPE;
 	signal ctl_read_last : STD_LOGIC;

@@ -81,7 +81,7 @@ end NorthBridge;
 
 architecture Behavioral of NorthBridge is
 
-	component FlashAdapter
+	component Flash
 		port (Clock : in std_logic;
 				Reset : in std_logic;
 				Address : in std_logic_vector(22 downto 0);
@@ -121,7 +121,7 @@ architecture Behavioral of NorthBridge is
 
 begin
 
-	FlashAdapterInstance : FlashAdapter port map (
+	FlashAdapterInstance : Flash port map (
 		Clock => Clock,
 		Reset => Reset,
 		Address => FlashAddrInput,
@@ -154,6 +154,7 @@ begin
 					not WriteEN when state=DATA_RW else
 					'0' when state=BOOT_RAM else
 					'1';
+
 	MemoryOE <= not ReadEN when state=DATA_RW else
 					'0' when state=INS_READ else
 					'1';
@@ -198,9 +199,9 @@ begin
 					state <= BOOT;
 				when BOOT_START =>
 					state <= BOOT_FLASH;
-					FlashTimer <= "00000000";
+					FlashTimer <= (others => '0');
 					FlashBootMemAddr <= (others => '0');
-					FlashBootAddr <= "00000000000000000000000";
+					FlashBootAddr <= (others => '0');
 				when BOOT_FLASH =>
 					case FlashTimer is
 						when "00000000" =>
@@ -210,7 +211,7 @@ begin
 						when "11111111" =>
 							state <= BOOT_RAM;
 							FlashReadData <= FlashDataOutput;
-							FlashTimer <= "00000000";
+							FlashTimer <= (others => '0');
 						when others =>
 							FlashTimer <= STD_LOGIC_VECTOR(UNSIGNED(FlashTimer) + 1);
 							state <= BOOT_FLASH;

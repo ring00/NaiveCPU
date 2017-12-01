@@ -56,25 +56,21 @@ architecture Behavioral of VGATop is
 	signal Pixel : STD_LOGIC;
 
 	component char_mem is
-		port(
-			clk: in std_logic;
-			char_read_addr : in std_logic_vector(11 downto 0);
-			char_write_addr: in std_logic_vector(11 downto 0);
-			char_we : in std_logic;
-			char_write_value : in std_logic_vector(7 downto 0);
-			char_read_value : out std_logic_vector(7 downto 0)
-		);
+		Port (clk: in STD_LOGIC;
+				char_read_addr : in STD_LOGIC_VECTOR(11 downto 0);
+				char_write_addr: in STD_LOGIC_VECTOR(11 downto 0);
+				char_we : in STD_LOGIC;
+				char_write_value : in STD_LOGIC_VECTOR(7 downto 0);
+				char_read_value : out STD_LOGIC_VECTOR(7 downto 0));
 	end component;
 
 	signal CharReadAddress : STD_LOGIC_VECTOR(11 downto 0);
 	signal CharReadValue : STD_LOGIC_VECTOR(7 downto 0);
 
-	component font_rom is
-		port(
-			clk: in std_logic;
-			addr: in std_logic_vector(10 downto 0);
-			data: out std_logic_vector(7 downto 0)
-		);
+	component FontRom is
+		Port (clk: in STD_LOGIC;
+				addr: in STD_LOGIC_VECTOR(10 downto 0);
+				data: out STD_LOGIC_VECTOR(7 downto 0));
 	end component;
 
 	signal RomAddress : STD_LOGIC_VECTOR(10 downto 0);
@@ -114,7 +110,7 @@ begin
 
 	RomAddress <= CharReadValue & PixelY(3 downto 0);
 
-	FontRomInstance : font_rom port map (
+	FontRomInstance : FontRom port map (
 		clk => Clock,
 		addr => RomAddress,
 		data => RomData
@@ -124,11 +120,11 @@ begin
 	begin
 		if (Reset = '1') then
 			BitAddress <= (others => '0');
-		elsif (rising_edge(Clock)) then
+		elsif (RISING_EDGE(Clock)) then
 			BitAddress <= PixelX(2 downto 0);
 		end if;
 	end process BitAddressUpdate;
 
-	Pixel <= RomData(TO_INTEGER(UNSIGNED(not BitAddress)));
+	Pixel <= RomData(TO_INTEGER(UNSIGNED(not BitAddress))); -- TODO: Should I use 'NOT' here?
 
 end Behavioral;
