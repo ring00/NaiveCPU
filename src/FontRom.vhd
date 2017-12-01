@@ -13,21 +13,21 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity FontRom is
-	Port (clk: in std_logic;
-			addr: in std_logic_vector(10 downto 0);
-			data: out std_logic_vector(7 downto 0));
+	Port (Clock: in STD_LOGIC;
+			Address: in STD_LOGIC_VECTOR(10 downto 0);
+			Data: out STD_LOGIC_VECTOR(7 downto 0));
 end FontRom;
 
 architecture Arch of FontRom is
 
-	constant ADDR_WIDTH : integer := 11;
-	constant DATA_WIDTH : integer := 8;
+	constant ADDR_WIDTH : INTEGER := 11;
+	constant DATA_WIDTH : INTEGER := 8;
 
-	signal addr_reg: std_logic_vector(ADDR_WIDTH-1 downto 0);
-	type ROM_TYPE is array (0 to 2**ADDR_WIDTH-1) of std_logic_vector(DATA_WIDTH-1 downto 0);
+	signal AddrReg : STD_LOGIC_VECTOR(ADDR_WIDTH-1 downto 0);
+	type ROM_TYPE is array (0 to 2**ADDR_WIDTH-1) of STD_LOGIC_VECTOR(DATA_WIDTH-1 downto 0);
 
 	-- ROM definition
-	constant ROM: ROM_TYPE :=(   -- 2^11-by-8
+	constant ROM : ROM_TYPE := ( -- 2^11-by-8
 		"00000000", -- 0
 		"00000000", -- 1
 		"00000000", -- 2
@@ -2207,14 +2207,14 @@ architecture Arch of FontRom is
 	);
 
 begin
-	-- addr register to infer block RAM
-	Update : process (clk)
+	-- Address register to infer block RAM
+	Update : process (Clock)
 	begin
-		if (RISING_EDGE(clk)) then
-		  addr_reg <= addr;
+		if (RISING_EDGE(Clock)) then
+		  AddrReg <= Address;
 		end if;
 	end process Update;
 
-	data <= ROM(TO_INTEGER(UNSIGNED(addr_reg)));
+	Data <= ROM(TO_INTEGER(UNSIGNED(AddrReg)));
 
 end Arch;

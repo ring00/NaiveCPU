@@ -68,9 +68,9 @@ architecture Behavioral of VGATop is
 	signal CharReadValue : STD_LOGIC_VECTOR(7 downto 0);
 
 	component FontRom is
-		Port (clk: in STD_LOGIC;
-				addr: in STD_LOGIC_VECTOR(10 downto 0);
-				data: out STD_LOGIC_VECTOR(7 downto 0));
+		Port (Clock: in STD_LOGIC;
+				Address: in STD_LOGIC_VECTOR(10 downto 0);
+				Data: out STD_LOGIC_VECTOR(7 downto 0));
 	end component;
 
 	signal RomAddress : STD_LOGIC_VECTOR(10 downto 0);
@@ -111,9 +111,9 @@ begin
 	RomAddress <= CharReadValue & PixelY(3 downto 0);
 
 	FontRomInstance : FontRom port map (
-		clk => Clock,
-		addr => RomAddress,
-		data => RomData
+		Clock => Clock,
+		Address => RomAddress,
+		Data => RomData
 	);
 
 	BitAddressUpdate : process (Reset, Clock)
