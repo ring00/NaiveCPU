@@ -65,9 +65,8 @@ entity NorthBridge is
 			KeyboardDATA_READY : in std_logic;
 			KeyboardData : in std_logic_vector(7 downto 0);
 
-			VGAWriteEn : out STD_LOGIC;
-			VGAWriteAddress : out STD_LOGIC_VECTOR(11 downto 0);
-			VGAWriteData : out STD_LOGIC_VECTOR(7 downto 0);
+			MnistImage : out STD_LOGIC_VECTOR(3 downto 0);
+			MnistAnswer : out STD_LOGIC_VECTOR(3 downto 0);
 
 			FlashByte : out std_logic;
 			FlashVpen : out std_logic;
@@ -151,6 +150,8 @@ begin
 					'1' when (Address2=x"BF01" and state=DATA_RW) else
 					'1' when (Address2=x"BF02" and state=DATA_RW) else
 					'1' when (Address2=x"BF03" and state=DATA_RW) else
+					'1' when (Address2=x"BF04" and state=DATA_RW) else
+					'1' when (Address2=x"BF05" and state=DATA_RW) else
 					not WriteEN when state=DATA_RW else
 					'0' when state=BOOT_RAM else
 					'1';
@@ -173,10 +174,6 @@ begin
 
 	SerialRDN <= not ReadEN when (Address2=x"BF00" and (state=DATA_PRE or state=DATA_RW)) else '1';
 	SerialWRN <= not WriteEN when (Address2=x"BF00" and (state=INS_READ or state=DATA_RW)) else '1';
-
-	VGAWriteEn <= '1' when (WriteEN='1' and state=DATA_RW and (Address2(15 downto 12) = X"F")) else '0';
-	VGAWriteAddress <= Address2(11 downto 0);
-	VGAWriteData <= DataInput2(7 downto 0);
 
 	KeyboardRDN <= '0' when (Address2=x"BF02" and state=DATA_RW) else '1';
 
@@ -243,6 +240,10 @@ begin
 							BufferData2 <= "00000000" & KeyboardData;
 						when x"BF03" =>
 							BufferData2 <= BF03;
+						when x"BF04" =>
+							MnistImage <= MemoryDataBus(3 downto 0);
+						when x"BF05" =>
+							MnistAnswer <= MemoryDataBus(3 downto 0);
 						when others =>
 							BufferData2 <= MemoryDataBus;
 					end case;

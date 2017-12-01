@@ -140,9 +140,8 @@ architecture Behavioral of CPUTop is
 				KeyboardDATA_READY : in STD_LOGIC;
 				KeyboardData : in STD_LOGIC_VECTOR(7 downto 0);
 
-				VGAWriteEn : out STD_LOGIC;
-				VGAWriteAddress : out STD_LOGIC_VECTOR(11 downto 0);
-				VGAWriteData : out STD_LOGIC_VECTOR(7 downto 0);
+				MnistImage : out STD_LOGIC_VECTOR(3 downto 0);
+				MnistAnswer : out STD_LOGIC_VECTOR(3 downto 0);
 
 				FlashByte : out STD_LOGIC;
 				FlashVpen : out STD_LOGIC;
@@ -158,9 +157,8 @@ architecture Behavioral of CPUTop is
 	signal InstData : STD_LOGIC_VECTOR(15 downto 0);
 	signal RamData : STD_LOGIC_VECTOR(15 downto 0);
 
-	signal VGAWriteEn : STD_LOGIC;
-	signal VGAWriteAddress : STD_LOGIC_VECTOR(11 downto 0);
-	signal VGAWriteData : STD_LOGIC_VECTOR(7 downto 0);
+	signal MnistImage : STD_LOGIC_VECTOR(3 downto 0);
+	signal MnistAnswer : STD_LOGIC_VECTOR(3 downto 0);
 
 	component Seg7 is
 		Port (Number : in STD_LOGIC_VECTOR(3 downto 0);
@@ -193,14 +191,14 @@ architecture Behavioral of CPUTop is
 	signal KeyboardDATA_READY : STD_LOGIC;
 	signal KeyboardData : STD_LOGIC_VECTOR(7 downto 0);
 
-	component VGATop is
-		Port (Reset : in STD_LOGIC;
-				Clock : in STD_LOGIC;
-				WriteEN : in STD_LOGIC;
-				WriteAddress : in STD_LOGIC_VECTOR(11 downto 0);
-				WriteData : in STD_LOGIC_VECTOR(7 downto 0);
-				Hs, Vs : out STD_LOGIC;
-				R, G, B : out STD_LOGIC_VECTOR(2 downto 0));
+	component Mnist is
+		Port (Clk_0 : in STD_LOGIC;
+				Reset : in STD_LOGIC;
+				Image : in STD_LOGIC_VECTOR(3 downto 0);
+				Answer : in STD_LOGIC_VECTOR(3 downto 0);
+				Hs, Vs : out STD_LOGIC; 
+				R, G, B : out STD_LOGIC_VECTOR(2 downto 0)
+		);
 	end component;
 
 begin
@@ -272,9 +270,8 @@ begin
 		KeyboardRDN => KeyboardRDN,
 		KeyboardDATA_READY => KeyboardDATA_READY,
 		KeyboardData => KeyboardData,
-		VGAWriteEn => VGAWriteEn,
-		VGAWriteAddress => VGAWriteAddress,
-		VGAWriteData => VGAWriteData,
+		MnistImage => MnistImage,
+		MnistAnswer => MnistAnswer,
 		FlashByte => FlashByte,
 		FlashVpen => FlashVpen,
 		FlashCE => FlashCE,
@@ -295,12 +292,11 @@ begin
 		Output => KeyboardData
 	);
 
-	VGATopInstance : VGATop port map (
-		Reset => Reset,
-		Clock => Clock,
-		WriteEN => VGAWriteEn,
-		WriteAddress => VGAWriteAddress,
-		WriteData => VGAWriteData,
+	MnistInstance : Mnist port map (
+		Clk_0 => Clock,
+		Reset => ResetInv,
+		Image => MnistImage,
+		Answer => MnistAnswer,
 		Hs => Hs,
 		Vs => Vs,
 		R => R,
