@@ -43,7 +43,7 @@ architecture Behavioral of VGATop is
 
 	component VGA is
 		Port (Reset : in STD_LOGIC;
-				Clock : in STD_LOGIC;
+				Clock50 : in STD_LOGIC;
 				Hs, Vs : out STD_LOGIC;
 				R, G, B : out STD_LOGIC_VECTOR(2 downto 0);
 				PixelX : out STD_LOGIC_VECTOR(9 downto 0);
@@ -79,13 +79,13 @@ architecture Behavioral of VGATop is
 	signal Col : STD_LOGIC_VECTOR(6 downto 0);
 	signal Row : STD_LOGIC_VECTOR(4 downto 0);
 
-	signal BitAddress : STD_LOGIC(2 downto 0);
+	signal BitAddress : STD_LOGIC_VECTOR(2 downto 0);
 
 begin
 
 	VGAInstance : VGA port map (
 		Reset => Reset,
-		Clock => Clock,
+		Clock50 => Clock,
 		Hs => Hs,
 		Vs => Vs,
 		R => R,
@@ -98,17 +98,18 @@ begin
 
 	Col <= PixelX(9 downto 3);
 	Row <= PixelY(8 downto 4);
+	CharReadAddress <= Row & Col;
 
-	CharRamInstance : char_ram port map (
+	CharRamInstance : char_mem port map (
 		clk => Clock,
-		char_read_addr => Row & Col,
+		char_read_addr => CharReadAddress,
 		char_write_addr => WriteAddress,
 		char_we => WriteEN,
 		char_write_value => WriteData,
 		char_read_value => CharReadValue
 	);
 
-	RomAddress <= CharReadValue & PixelY(3 downto 0);
+	RomAddress <= CharReadValue(6 downto 0) & PixelY(3 downto 0);
 
 	FontRomInstance : FontRom port map (
 		Clock => Clock,
@@ -125,6 +126,6 @@ begin
 		end if;
 	end process BitAddressUpdate;
 
-	Pixel <= RomData(TO_INTEGER(UNSIGNED(not BitAddress))); -- TODO: Should I use 'NOT' here?
+	Pixel <= RomData(TO_INTEGER(UNSIGNED(not PixelX(2 downto 0)))); -- TODO: Should I use 'NOT' here?
 
 end Behavioral;

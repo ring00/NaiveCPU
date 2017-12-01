@@ -2215,6 +2215,6 @@ begin
 		end if;
 	end process Update;
 
-	Data <= ROM(TO_INTEGER(UNSIGNED(AddrReg)));
+	Data <= ROM(TO_INTEGER(UNSIGNED(Address)));
 
 end Arch;

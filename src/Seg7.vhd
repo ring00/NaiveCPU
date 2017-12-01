@@ -31,13 +31,13 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity Seg7 is
 	Port (Number : in STD_LOGIC_VECTOR(3 downto 0);
-			Dispaly : out STD_LOGIC_VECTOR(6 downto 0));
+			Display : out STD_LOGIC_VECTOR(6 downto 0));
 end Seg7;
 
 architecture Behavioral of Seg7 is
 begin
 
-	with Number select Dispaly <=
+	with Number select Display <=
 		"1111110" when "0000", -- 0
 		"0110000" when "0001", -- 1
 		"1101101" when "0010", -- 2

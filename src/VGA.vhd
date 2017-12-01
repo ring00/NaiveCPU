@@ -26,7 +26,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- TODO : Use IEEE.NUMERIC_STD instead of non-standard package
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
+--use IEEE.STD_LOGIC_ARITH.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -43,7 +43,7 @@ entity VGA is
 			Pixel : in STD_LOGIC);
 end VGA;
 
-architecture Behavioral of VGACore is
+architecture Behavioral of VGA is
 
 	signal Clock : STD_LOGIC; -- 25MHz Clock
 	signal r1, g1, b1 : STD_LOGIC_VECTOR(2 downto 0);
@@ -53,16 +53,21 @@ architecture Behavioral of VGACore is
 
 begin
 
+	PixelX <= vector_x;
+	PixelY <= vector_y;
+
 	FrequencyDivider : process (Clock50)
 	begin
-		if (RISING_EDGE(Clock50)) then
+		if (Reset = '1') then
+			Clock <= '0';
+		elsif (RISING_EDGE(Clock50)) then
 			Clock <= not Clock;
 		end if;
 	end process FrequencyDivider;
 
 	MoveVectorX : process (Reset, Clock)
 	begin
-		if (Reset = '0') then
+		if (Reset = '1') then
 			vector_x <= (others => '0');
 		elsif (RISING_EDGE(Clock)) then
 			if vector_x = 799 then
@@ -75,7 +80,7 @@ begin
 
 	MoveVectorY : process (Reset, Clock)
 	begin
-		if (Reset = '0') then
+		if (Reset = '1') then
 			vector_y <= (others => '0');
 		elsif (RISING_EDGE(Clock)) then
 			if vector_x = 799 then
@@ -90,7 +95,7 @@ begin
 
 	HorizontalSync : process (Reset, Clock)
 	begin
-		if (Reset = '0') then
+		if (Reset = '1') then
 			hs1 <= '1';
 		elsif (RISING_EDGE(Clock)) then
 			if (vector_x >= 656 and vector_x < 752) then
@@ -103,10 +108,10 @@ begin
 
 	VerticalSync : process (Reset, Clock)
 	begin
-		if (Reset = '0') then
-			hs1 <= '1';
+		if (Reset = '1') then
+			vs1 <= '1';
 		elsif (RISING_EDGE(Clock)) then
-			if (vector_y >= 490 and vector_x < 492) then
+			if (vector_y >= 490 and vector_y < 492) then
 				vs1 <= '0';
 			else
 				vs1 <= '1';
@@ -116,7 +121,7 @@ begin
 
 	SetHorizontalSync : process (Reset, Clock)
 	begin
-		if (Reset = '0') then
+		if (Reset = '1') then
 			Hs <= '0';
 		elsif (RISING_EDGE(Clock)) then
 			Hs <= hs1;
@@ -125,16 +130,16 @@ begin
 
 	SetVerticalSync : process (Reset, Clock)
 	begin
-		if (Reset = '0') then
+		if (Reset = '1') then
 			Vs <= '0';
 		elsif (RISING_EDGE(Clock)) then
 			Vs <= vs1;
 		end if;
 	end process SetVerticalSync;
 
-	ColorGenerator : process (Reset, Clock)
+	ColorGenerator : process (Reset, Clock, vector_x, vector_y)
 	begin
-		if (Reset = '0') then
+		if (Reset = '1') then
 			r1 <= (others => '0');
 			g1 <= (others => '0');
 			b1 <= (others => '0');
@@ -151,11 +156,17 @@ begin
 		end if;
 	end process ColorGenerator;
 
-	R <= r1 when hs1 = '1' and vs1 = '1' else
-		  (others => '0');
-	G <= g1 when hs1 = '1' and vs1 = '1' else
-		  (others => '0');
-	B <= b1 when hs1 = '1' and vs1 = '1' else
-		  (others => '0');
+	UpdateRGB : process (hs1, vs1, r1, g1, b1)
+	begin
+		if (hs1 = '1' and vs1 = '1') then
+			R <= r1;
+			G <= g1;
+			B <= b1;
+		else
+			R <= (others => '0');
+			G <= (others => '0');
+			B <= (others => '0');
+		end if;
+	end process UpdateRGB;
 
 end Behavioral;

@@ -60,9 +60,9 @@ entity CPUTop is
 
 			Hs : out STD_LOGIC;
 			Vs : out STD_LOGIC;
-			R : out STD_LOGIC_VECTOR(2 downto 0)
-			G : out STD_LOGIC_VECTOR(2 downto 0)
-			B : out STD_LOGIC_VECTOR(2 downto 0)
+			R : out STD_LOGIC_VECTOR(2 downto 0);
+			G : out STD_LOGIC_VECTOR(2 downto 0);
+			B : out STD_LOGIC_VECTOR(2 downto 0);
 
 			FlashByte : out STD_LOGIC;
 			FlashVpen : out STD_LOGIC;
@@ -164,7 +164,7 @@ architecture Behavioral of CPUTop is
 
 	component Seg7 is
 		Port (Number : in STD_LOGIC_VECTOR(3 downto 0);
-				Dispaly : out STD_LOGIC_VECTOR(6 downto 0));
+				Display : out STD_LOGIC_VECTOR(6 downto 0));
 	end component;
 
 	signal Number0 : STD_LOGIC_VECTOR(3 downto 0);
@@ -180,13 +180,13 @@ architecture Behavioral of CPUTop is
 	signal ClockFX : STD_LOGIC;
 
 	component KeyboardTop is
-		Port (PS2Data : in STD_LOGIC; -- PS2 data
-				PS2Clock : in STD_LOGIC; -- PS2 clk
+		Port (PS2Data : in STD_LOGIC;
+				PS2Clock : in STD_LOGIC;
 				Clock : in STD_LOGIC;
 				Reset : in STD_LOGIC;
 				DataReceive : in STD_LOGIC;
-				DataReady : out STD_LOGIC ;  -- data output enable signal
-				Output : out STD_LOGIC_VECTOR(7 downto 0)); -- scan code signal output
+				DataReady : out STD_LOGIC ;
+				Output : out STD_LOGIC_VECTOR(7 downto 0));
 	end component;
 
 	signal KeyboardRDN : STD_LOGIC;
