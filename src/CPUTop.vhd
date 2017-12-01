@@ -58,6 +58,12 @@ entity CPUTop is
 			PS2Clock : in STD_LOGIC;
 			PS2Data : in STD_LOGIC;
 
+			Hs : out STD_LOGIC;
+			Vs : out STD_LOGIC;
+			R : out STD_LOGIC_VECTOR(2 downto 0)
+			G : out STD_LOGIC_VECTOR(2 downto 0)
+			B : out STD_LOGIC_VECTOR(2 downto 0)
+
 			FlashByte : out STD_LOGIC;
 			FlashVpen : out STD_LOGIC;
 			FlashCE : out STD_LOGIC;
@@ -74,6 +80,8 @@ entity CPUTop is
 end CPUTop;
 
 architecture Behavioral of CPUTop is
+
+	signal Reset : STD_LOGIC;
 
 	component CPU is
 		Port (Clock : in STD_LOGIC;
@@ -132,6 +140,10 @@ architecture Behavioral of CPUTop is
 				KeyboardDATA_READY : in std_logic;
 				KeyboardData : in std_logic_vector(7 downto 0);
 
+				VGAWriteEn : out STD_LOGIC;
+				VGAWriteAddress : out STD_LOGIC_VECTOR(11 downto 0);
+				VGAWriteData : out STD_LOGIC_VECTOR(7 downto 0);
+
 				FlashByte : out std_logic;
 				FlashVpen : out std_logic;
 				FlashCE : out std_logic;
@@ -145,7 +157,10 @@ architecture Behavioral of CPUTop is
 	signal CPUClock : STD_LOGIC;
 	signal InstData : STD_LOGIC_VECTOR(15 downto 0);
 	signal RamData : STD_LOGIC_VECTOR(15 downto 0);
-	signal Reset : STD_LOGIC;
+
+	signal VGAWriteEn : STD_LOGIC;
+	signal VGAWriteAddress : STD_LOGIC_VECTOR(11 downto 0);
+	signal VGAWriteData : STD_LOGIC_VECTOR(7 downto 0);
 
 	component Seg7 is
 	port(
@@ -183,6 +198,16 @@ architecture Behavioral of CPUTop is
 	signal KeyboardRDN : STD_LOGIC;
 	signal KeyboardDATA_READY : STD_LOGIC;
 	signal KeyboardData : STD_LOGIC_VECTOR(7 downto 0);
+
+	component VGATop is
+		Port (Reset : in STD_LOGIC;
+				Clock : in STD_LOGIC;
+				WriteEN : in STD_LOGIC;
+				WriteAddress : in STD_LOGIC_VECTOR(11 downto 0);
+				WriteData : in STD_LOGIC_VECTOR(7 downto 0);
+				Hs, Vs : out STD_LOGIC;
+				R, G, B : out STD_LOGIC_VECTOR(2 downto 0));
+	end component;
 
 begin
 
@@ -251,6 +276,9 @@ begin
 		KeyboardRDN => KeyboardRDN,
 		KeyboardDATA_READY => KeyboardDATA_READY,
 		KeyboardData => KeyboardData,
+		VGAWriteEn => VGAWriteEn,
+		VGAWriteAddress => VGAWriteAddress,
+		VGAWriteData => VGAWriteData,
 		FlashByte => FlashByte,
 		FlashVpen => FlashVpen,
 		FlashCE => FlashCE,
@@ -274,6 +302,19 @@ begin
 		DataReceive => KeyboardRDN,
 		DataReady => KeyboardDATA_READY,
 		Output => KeyboardData
+	);
+
+	VGATopInstance : VGATop port map (
+		Reset => Reset,
+		Clock => Clock,
+		WriteEN => VGAWriteEn,
+		WriteAddress => VGAWriteAddress,
+		WriteData => VGAWriteData,
+		Hs => Hs,
+		Vs => Vs,
+		R => R,
+		G => G,
+		B => B
 	);
 
 end Behavioral;

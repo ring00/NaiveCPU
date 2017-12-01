@@ -65,6 +65,10 @@ entity NorthBridge is
 			KeyboardDATA_READY : in std_logic;
 			KeyboardData : in std_logic_vector(7 downto 0);
 
+			VGAWriteEn : out STD_LOGIC;
+			VGAWriteAddress : out STD_LOGIC_VECTOR(11 downto 0);
+			VGAWriteData : out STD_LOGIC_VECTOR(7 downto 0);
+
 			FlashByte : out std_logic;
 			FlashVpen : out std_logic;
 			FlashCE : out std_logic;
@@ -168,6 +172,10 @@ begin
 
 	SerialRDN <= not ReadEN when (Address2=x"BF00" and (state=DATA_PRE or state=DATA_RW)) else '1';
 	SerialWRN <= not WriteEN when (Address2=x"BF00" and (state=INS_READ or state=DATA_RW)) else '1';
+
+	VGAWriteEn <= '1' when (WriteEN='1' and state=DATA_RW and (Address2(15 downto 12) = X"F")) else '0';
+	VGAWriteAddress <= Address2(11 downto 0);
+	VGAWriteData <= DataInput2(7 downto 0);
 
 	KeyboardRDN <= '0' when (Address2=x"BF02" and state=DATA_RW) else '1';
 
