@@ -45,11 +45,11 @@ end VGA;
 
 architecture Behavioral of VGACore is
 
-	signal clk : std_logic;
-	signal r1, g1, b1 : std_logic_vector(2 downto 0);
-	signal hs1, vs1 : std_logic;
-	signal vector_x : std_logic_vector(9 downto 0);
-	signal vector_y : std_logic_vector(8 downto 0);
+	signal clk : STD_LOGIC;
+	signal r1, g1, b1 : STD_LOGIC_VECTOR(2 downto 0);
+	signal hs1, vs1 : STD_LOGIC;
+	signal vector_x : STD_LOGIC_VECTOR(9 downto 0);
+	signal vector_y : STD_LOGIC_VECTOR(8 downto 0);
 
 begin
 

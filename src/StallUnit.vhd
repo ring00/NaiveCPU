@@ -47,11 +47,9 @@ end StallUnit;
 architecture Behavioral of StallUnit is
 begin
 
-	PCWriteEN <= '0' when DataHazard = '1' else
-					 '1';
+	PCWriteEN <= '0' when DataHazard = '1' else '1';
 
-	IFIDWriteEN <= '0' when DataHazard = '1' else
-						'1';
+	IFIDWriteEN <= '0' when DataHazard = '1' else '1';
 
 	IDEXWriteEN <= '1';
 
@@ -61,11 +59,9 @@ begin
 
 	PCClear <= '0';
 
-	IFIDClear <= '1' when Misprediction = '1' else
-					 '0';
+	IFIDClear <= '1' when Misprediction = '1' else '0';
 
-	IDEXClear <= '1' when DataHazard = '1' else
-					 '0';
+	IDEXClear <= '1' when DataHazard = '1' else '0';
 
 	EXMEMClear <= '0';
 

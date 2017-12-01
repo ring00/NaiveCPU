@@ -62,7 +62,7 @@ begin
 			state <= DELAY;
 			code <= (others => '0');
 			fokSignal <= '1';
-			code <= "00000000";
+			code <= (others => '0');
 			fokSignal <= '0';
 			DataReady <= '0';
 			flag <= '0';
