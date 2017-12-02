@@ -79,8 +79,6 @@ architecture Behavioral of VGATop is
 	signal Col : STD_LOGIC_VECTOR(6 downto 0);
 	signal Row : STD_LOGIC_VECTOR(4 downto 0);
 
-	signal BitAddress : STD_LOGIC_VECTOR(2 downto 0);
-
 begin
 
 	VGAInstance : VGA port map (
@@ -116,15 +114,6 @@ begin
 		Address => RomAddress,
 		Data => RomData
 	);
-
-	BitAddressUpdate : process (Reset, Clock)
-	begin
-		if (Reset = '1') then
-			BitAddress <= (others => '0');
-		elsif (RISING_EDGE(Clock)) then
-			BitAddress <= PixelX(2 downto 0);
-		end if;
-	end process BitAddressUpdate;
 
 	Pixel <= RomData(TO_INTEGER(UNSIGNED(not PixelX(2 downto 0)))); -- TODO: Should I use 'NOT' here?
 

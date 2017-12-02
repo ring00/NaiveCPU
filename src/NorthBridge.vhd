@@ -151,6 +151,7 @@ begin
 					'1' when (Address2=x"BF01" and state=DATA_RW) else
 					'1' when (Address2=x"BF02" and state=DATA_RW) else
 					'1' when (Address2=x"BF03" and state=DATA_RW) else
+					'1' when (Address2(15 downto 12)=x"F" and state=DATA_RW) else
 					not WriteEN when state=DATA_RW else
 					'0' when state=BOOT_RAM else
 					'1';
