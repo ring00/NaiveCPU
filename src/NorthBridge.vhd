@@ -30,94 +30,94 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity NorthBridge is
-	port (Clock : in std_logic;
-			Reset : in std_logic;
-			CPUClock : out std_logic;
+	port (Clock : in STD_LOGIC;
+			Reset : in STD_LOGIC;
+			CPUClock : out STD_LOGIC;
 
-			BootROM : in std_logic;
+			BootROM : in STD_LOGIC;
 
-			ReadEN : in std_logic;
-			WriteEN : in std_logic;
+			ReadEN : in STD_LOGIC;
+			WriteEN : in STD_LOGIC;
 
-			Address1 : in std_logic_vector(15 downto 0);
-			DataOutput1 : out std_logic_vector(15 downto 0);
+			Address1 : in STD_LOGIC_VECTOR(15 downto 0);
+			DataOutput1 : out STD_LOGIC_VECTOR(15 downto 0);
 
-			Address2 : in std_logic_vector(15 downto 0);
-			DataInput2 : in std_logic_vector(15 downto 0);
-			DataOutput2 : out std_logic_vector(15 downto 0);
+			Address2 : in STD_LOGIC_VECTOR(15 downto 0);
+			DataInput2 : in STD_LOGIC_VECTOR(15 downto 0);
+			DataOutput2 : out STD_LOGIC_VECTOR(15 downto 0);
 
-			MemoryAddress : out std_logic_vector(17 downto 0);
-			MemoryDataBus : inout std_logic_vector(15 downto 0);
-			MemoryEN : out std_logic;
-			MemoryOE : out std_logic;
-			MemoryWE : out std_logic;
+			MemoryAddress : out STD_LOGIC_VECTOR(17 downto 0);
+			MemoryDataBus : inout STD_LOGIC_VECTOR(15 downto 0);
+			MemoryEN : out STD_LOGIC;
+			MemoryOE : out STD_LOGIC;
+			MemoryWE : out STD_LOGIC;
 
-			Ram1EN : out std_logic;
+			Ram1EN : out STD_LOGIC;
 
-			SerialWRN : out std_logic;
-			SerialRDN : out std_logic;
-			SerialDATA_READY : in std_logic;
-			SerialTSRE : in std_logic;
-			SerialTBRE : in std_logic;
-			SerialDataBus : inout std_logic_vector(7 downto 0);
+			SerialWRN : out STD_LOGIC;
+			SerialRDN : out STD_LOGIC;
+			SerialDATA_READY : in STD_LOGIC;
+			SerialTSRE : in STD_LOGIC;
+			SerialTBRE : in STD_LOGIC;
+			SerialDataBus : inout STD_LOGIC_VECTOR(7 downto 0);
 
-			KeyboardRDN : out std_logic;
-			KeyboardDATA_READY : in std_logic;
-			KeyboardData : in std_logic_vector(7 downto 0);
+			KeyboardRDN : out STD_LOGIC;
+			KeyboardDATA_READY : in STD_LOGIC;
+			KeyboardData : in STD_LOGIC_VECTOR(7 downto 0);
 
 			VGAWriteEn : out STD_LOGIC;
 			VGAWriteAddress : out STD_LOGIC_VECTOR(11 downto 0);
 			VGAWriteData : out STD_LOGIC_VECTOR(7 downto 0);
 
-			FlashByte : out std_logic;
-			FlashVpen : out std_logic;
-			FlashCE : out std_logic;
-			FlashOE : out std_logic;
-			FlashWE : out std_logic;
-			FlashRP : out std_logic;
-			FlashAddr : out std_logic_vector(22 downto 0);
-			FlashData : inout std_logic_vector(15 downto 0));
+			FlashByte : out STD_LOGIC;
+			FlashVpen : out STD_LOGIC;
+			FlashCE : out STD_LOGIC;
+			FlashOE : out STD_LOGIC;
+			FlashWE : out STD_LOGIC;
+			FlashRP : out STD_LOGIC;
+			FlashAddr : out STD_LOGIC_VECTOR(22 downto 0);
+			FlashData : inout STD_LOGIC_VECTOR(15 downto 0));
 end NorthBridge;
 
 architecture Behavioral of NorthBridge is
 
 	component Flash
-		port (Clock : in std_logic;
-				Reset : in std_logic;
-				Address : in std_logic_vector(22 downto 0);
-				OutputData : out std_logic_vector(15 downto 0);
-				ctl_read : in std_logic;
+		port (Clock : in STD_LOGIC;
+				Reset : in STD_LOGIC;
+				Address : in STD_LOGIC_VECTOR(22 downto 0);
+				OutputData : out STD_LOGIC_VECTOR(15 downto 0);
+				ctl_read : in STD_LOGIC;
 
-				FlashByte : out std_logic;
-				FlashVpen : out std_logic;
-				FlashCE : out std_logic;
-				FlashOE : out std_logic;
-				FlashWE : out std_logic;
-				FlashRP : out std_logic;
+				FlashByte : out STD_LOGIC;
+				FlashVpen : out STD_LOGIC;
+				FlashCE : out STD_LOGIC;
+				FlashOE : out STD_LOGIC;
+				FlashWE : out STD_LOGIC;
+				FlashRP : out STD_LOGIC;
 
-				FlashAddr : out std_logic_vector(22 downto 0);
-				FlashData : inout std_logic_vector(15 downto 0)
+				FlashAddr : out STD_LOGIC_VECTOR(22 downto 0);
+				FlashData : inout STD_LOGIC_VECTOR(15 downto 0)
 		);
 	end component;
 
 	type STATE_TYPE is (BOOT, BOOT_START, BOOT_FLASH, BOOT_RAM, BOOT_COMPLETE, DATA_PRE, DATA_RW, INS_READ);
 	signal state : STATE_TYPE;
 
-	signal BufferData1, BufferData2 : std_logic_vector(15 downto 0);
-	signal BF01 : std_logic_vector(15 downto 0);
-	signal BF03 : std_logic_vector(15 downto 0);
+	signal BufferData1, BufferData2 : STD_LOGIC_VECTOR(15 downto 0);
+	signal BF01 : STD_LOGIC_VECTOR(15 downto 0);
+	signal BF03 : STD_LOGIC_VECTOR(15 downto 0);
 
-	signal MemoryBusFlag, SerialBusFlag : std_logic;
-	signal MemoryBusHolder : std_logic_vector(15 downto 0);
+	signal MemoryBusFlag, SerialBusFlag : STD_LOGIC;
+	signal MemoryBusHolder : STD_LOGIC_VECTOR(15 downto 0);
 
-	signal FlashBootMemAddr : std_logic_vector(15 downto 0);
-	signal FlashBootAddr : std_logic_vector(22 downto 0);
-	signal FlashAddrInput : std_logic_vector(22 downto 0);
-	signal FlashDataOutput : std_logic_vector(15 downto 0);
+	signal FlashBootMemAddr : STD_LOGIC_VECTOR(15 downto 0);
+	signal FlashBootAddr : STD_LOGIC_VECTOR(22 downto 0);
+	signal FlashAddrInput : STD_LOGIC_VECTOR(22 downto 0);
+	signal FlashDataOutput : STD_LOGIC_VECTOR(15 downto 0);
 
-	signal FlashTimer : std_logic_vector(7 downto 0);
-	signal FlashReadData : std_logic_vector(15 downto 0);
-	signal ctl_read : std_logic;
+	signal FlashTimer : STD_LOGIC_VECTOR(7 downto 0);
+	signal FlashReadData : STD_LOGIC_VECTOR(15 downto 0);
+	signal ctl_read : STD_LOGIC;
 
 begin
 
