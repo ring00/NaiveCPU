@@ -139,7 +139,7 @@ Clk25 <= clk;
 			g1	<= "000";
 			b1	<= "000";	
 		elsif(clk'event and clk='1')then	
-			if vector_x(9 downto 7) = "001" and vector_y(8 downto 7) = "01" and (Image <= "0101") then
+			if vector_x(9 downto 7) = "001" and vector_y(8 downto 7) = "01" and (Image <= "1001") then
 				Address <= Image & vector_y(6 downto 2) & vector_x(6 downto 2);
 				if Q = '0' then
 					r1 <="111";				  	
