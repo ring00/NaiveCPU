@@ -1,3 +1,5 @@
+-- FPGA Prototyping by VHDL Examples: Xilinx Spartan-3 Version
+-- http://academic.csuohio.edu/chu_p/rtl/fpga_vhdl.html
 -- VGA Character Memory
 --
 -- This memory can store 128x32 characters where each character is
@@ -26,24 +28,24 @@ architecture arch of char_mem is
 	constant CHAR_RAM_ADDR_WIDTH: integer := 12; -- 2^7 X 2^5
 	constant CHAR_RAM_WIDTH: integer := 8;  -- 8 bits per character
 	type char_ram_type is array (0 to 2**CHAR_RAM_ADDR_WIDTH-1)
-	  of std_logic_vector(CHAR_RAM_WIDTH-1 downto 0);
+		of std_logic_vector(CHAR_RAM_WIDTH-1 downto 0);
 	signal read_a : std_logic_vector(11 downto 0);
 
 	-- character memory signal
 	signal char_ram : char_ram_type;
 begin
 
-  -- character memory concurrent statement
-  process(clk)
-  begin
-	 if (clk'event and clk='1') then
-		if (char_we = '1') then
-		  char_ram(to_integer(unsigned(char_write_addr))) <= char_write_value;
+	-- character memory concurrent statement
+	process(clk)
+	begin
+		if (clk'event and clk='1') then
+			if (char_we = '1') then
+				char_ram(to_integer(unsigned(char_write_addr))) <= char_write_value;
+			end if;
+			read_a <= char_read_addr;
 		end if;
-		read_a <= char_read_addr;
-	 end if;
-  end process;
-  char_read_value <= char_ram(to_integer(unsigned(read_a)));
+	end process;
+	char_read_value <= char_ram(to_integer(unsigned(read_a)));
 
 end arch;
 

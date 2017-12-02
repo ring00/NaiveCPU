@@ -2207,13 +2207,6 @@ architecture Arch of FontRom is
 	);
 
 begin
-	-- Address register to infer block RAM
-	Update : process (Clock)
-	begin
-		if (RISING_EDGE(Clock)) then
-		  AddrReg <= Address;
-		end if;
-	end process Update;
 
 	Data <= ROM(TO_INTEGER(UNSIGNED(Address)));
 
