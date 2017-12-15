@@ -1,3 +1,0 @@
-当发生DataHazard的时候，PCWriteEN和IFIDWriteEN置0，IDEXClear置1。
-
-当发生Misprediction的时候IFIDClear置1。
